@@ -1,0 +1,859 @@
+// ============================================================================
+// FLUXVERDE: EU ENERGY AUDIT COMPLIANCE PLATFORM
+// JDL Model for JHipster + PostgreSQL + TimescaleDB
+// ============================================================================
+
+application {
+  config {
+    baseName fluxverde
+    applicationType monolith
+    databaseType sql
+    prodDatabaseType postgresql
+    packageName io.fluxverde.skeleton
+    // cacheProvider caffeine
+    buildTool maven
+    clientFramework angular
+    // useSass true
+    // enableSwaggerCodegen true
+    // enableHibernateCache true
+    dtoSuffix DTO
+    // pagination pagination
+    // service serviceImpl
+    // dto mapstruct
+    skipClient false
+    skipServer false
+    enableTranslation true                          // ← enable i18n
+    nativeLanguage en                               // ← default language
+    languages [en, de, pl, cs, ro, hu]             // ← all supported languages
+  }
+}
+
+paginate * with pagination except MeterReading, ConsumptionTrend
+paginate MeterReading with infinite-scroll
+paginate ConsumptionTrend with infinite-scroll
+// DTOs only for domain entities exposed via REST API
+dto Company, Site, EnergyAudit, AuditFinding, ReportGeneration, CompanyUser with mapstruct
+
+// Services only for entities with business logic
+service Company, Site, EnergyAudit, AuditFinding, CompanyUser, UserAuditAccess with serviceImpl
+
+// ============================================================================
+// 1. MULTI-TENANCY: COMPANY & ORGANIZATION STRUCTURE
+// ============================================================================
+
+/**
+ * Company: Root tenant entity representing an industrial organization
+ * Controls access to all child entities (sites, audits, users, reports)
+ */
+entity Company {
+  companyName String required unique minlength(3) maxlength(255)
+  registrationNumber String required unique
+  country String required minlength(2) maxlength(2)
+  legalRepresentative String maxlength(255)
+  contactEmail String required pattern(/^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/)
+  contactPhone String maxlength(20)
+  industry String maxlength(128)
+  employeeCount Integer min(1)
+  annualRevenueMEUR BigDecimal
+  totalEnergyTJPerYear BigDecimal
+  regulatoryObligation RegulatoryObligation // "NO_OBLIGATION", "10_85_TJ", "OVER_85_TJ"
+  nextMandatoryAuditDate LocalDate
+  lastAuditDate LocalDate
+  auditMethodology AuditMethodology // "ISO_50001", "EN_16247_1", "CUSTOM"
+  createdAt Instant
+  updatedAt Instant
+  status CompanyStatus // "ACTIVE", "INACTIVE", "ARCHIVED"
+}
+
+enum RegulatoryObligation {
+  NO_OBLIGATION, BETWEEN_10_85_TJ, OVER_85_TJ
+}
+
+enum AuditMethodology {
+  ISO_50001, EN_16247_1, CUSTOM
+}
+
+enum CompanyStatus {
+  ACTIVE, INACTIVE, ARCHIVED
+}
+
+/**
+ * Site: Physical location owned by a Company
+ * One company can have multiple sites
+ */
+entity Site {
+  siteName String required minlength(3) maxlength(255)
+  siteCode String required unique
+  address String required
+  city String required
+  postalCode String required
+  country String required minlength(2) maxlength(2)
+  latitude BigDecimal
+  longitude BigDecimal
+  siteType SiteType // "MANUFACTURING", "WAREHOUSE", "OFFICE", "DATA_CENTER"
+  productionProcess String maxlength(255)
+  totalAreaM2 Integer
+  estimatedAnnualConsumptionTJ BigDecimal
+  estimatedAnnualConsumptionkWh BigDecimal
+  lastAuditDate LocalDate
+  nextAuditDate LocalDate
+  auditStatus SiteAuditStatus // "NOT_AUDITED", "SCHEDULED", "IN_PROGRESS", "COMPLETED", "OVERDUE"
+  createdAt Instant
+  updatedAt Instant
+  status SiteStatus // "ACTIVE", "INACTIVE"
+}
+
+enum SiteType {
+  MANUFACTURING, WAREHOUSE, OFFICE, DATA_CENTER
+}
+
+enum SiteStatus {
+  ACTIVE, INACTIVE
+}
+
+enum SiteAuditStatus {
+  NOT_AUDITED, SCHEDULED, IN_PROGRESS, COMPLETED, OVERDUE
+}
+
+relationship ManyToOne {
+  Site{company} to Company
+}
+
+// ============================================================================
+// 2. DATA INPUT: METER TYPES, READINGS, AND IMPORT TRACKING
+// ============================================================================
+
+/**
+ * MeterType: Catalog of measurement types
+ */
+entity MeterType {
+  typeName String required unique
+  unit MeterTypeUnit required // "kWh", "m³", "GJ", "liters"
+  category MeterTypeCategory required // "ENERGY", "WATER", "GAS", "THERMAL", "OTHER"
+  conversionFactorToTJ BigDecimal
+  description String maxlength(1000)
+}
+
+enum MeterTypeCategory {
+  ENERGY, WATER, GAS, THERMAL, OTHER
+}
+
+enum MeterTypeUnit {
+  KWH, M3, GJ, LITERS
+}
+
+/**
+ * Meter: Physical or virtual measuring device at a Site
+ */
+entity Meter {
+  meterName String required
+  meterCode String required unique
+  meterSerialNumber String maxlength(128) unique
+  manufacturer String maxlength(128)
+  installationDate LocalDate
+  nominalPower Integer
+  accuracy String maxlength(50)
+  location String maxlength(255)
+  meterCategory MeterCategory // "MAIN", "SUB_METER", "BACKUP"
+  collectionMethod MeterCollectionMethod // "MANUAL_READING", "DIGITAL_API", "CSV_IMPORT"
+  readingFrequency MeterReadingFrequency // "DAILY", "WEEKLY", "MONTHLY"
+  isActive Boolean
+  createdAt Instant
+  updatedAt Instant
+}
+
+enum MeterCategory {
+  MAIN, SUB_METER, BACKUP
+}
+
+enum MeterCollectionMethod {
+  MANUAL_READING, DIGITAL_API, CSV_IMPORT
+}
+
+enum MeterReadingFrequency {
+  DAILY, WEEKLY, MONTHLY
+}
+
+relationship ManyToOne {
+  Meter{site} to Site
+  Meter{meterType} to MeterType
+}
+
+/**
+ * MeterReading: Individual meter readings (time-series data)
+ * Optimized for TimescaleDB storage and efficient queries
+ */
+entity MeterReading {
+  readingTimestamp Instant required
+  readingValue BigDecimal required
+  readingStatus MeterReadingState // "VALID", "ESTIMATED", "MISSING", "ANOMALY"
+  confidence Integer min(0) max(100)
+  source MeterReadingSource // "MANUAL", "CSV_IMPORT", "API", "MODBUS"
+  enteredByUser String maxlength(255)
+  enteredAt Instant
+  isOutlier Boolean
+  anomalyReason String maxlength(255)
+  notes String maxlength(1000)
+  batchId Long                          // NEW: Batch import identifier
+  normalizedValue BigDecimal            // NEW: Standardized to TJ
+}
+
+enum MeterReadingState {
+  VALID, ESTIMATED, MISSING, ANOMALY
+}
+
+enum MeterReadingSource {
+  MANUAL, CSV_IMPORT, API, MODBUS
+}
+
+relationship ManyToOne {
+  MeterReading{meter required} to Meter
+  MeterReading{sourceUpload} to CSVUpload  // NEW: Traceability
+}
+
+/**
+ * CSVUpload: Tracks bulk meter data imports
+ */
+entity CSVUpload {
+  fileName String required
+  fileSize Long
+  uploadedBy String required
+  uploadTimestamp Instant required
+  totalRecordsImported Long
+  successfulRecords Long
+  failedRecords Long
+  skippedRecords Long
+  importStatus UploadStatus // "PENDING", "IN_PROGRESS", "SUCCESS", "PARTIAL_SUCCESS", "FAILED"
+  errorLog String maxlength(5000)
+  isProcessed Boolean 
+  processedAt Instant
+  notes String maxlength(1000)
+}
+
+enum UploadStatus {
+  PENDING, IN_PROGRESS, SUCCESS, PARTIAL_SUCCESS, FAILED
+}
+
+relationship ManyToOne {
+  CSVUpload{site} to Site
+  CSVUpload{meterType} to MeterType
+}
+
+/**
+ * ManualMeterEntry: Represents manual data entry events with verification workflow
+ */
+entity ManualMeterEntry {
+  entryDate LocalDate required
+  meterReadingValue BigDecimal required
+  unit String required
+  enteredBy String required
+  entryTimestamp Instant required
+  verificationStatus VerificationState // "UNVERIFIED", "VERIFIED", "REJECTED"
+  verifiedBy String maxlength(255)
+  verificationTimestamp Instant
+  notes String maxlength(1000)
+  correctionNotes String maxlength(1000)
+  sourceDocument String maxlength(255)
+}
+
+enum VerificationState {
+  UNVERIFIED, VERIFIED, REJECTED
+}
+
+relationship ManyToOne {
+  ManualMeterEntry{meter} to Meter
+  ManualMeterEntry{enteredByUser required} to CompanyUser
+  ManualMeterEntry{verifiedByUser} to CompanyUser
+}
+
+// ============================================================================
+// 3. AUDIT WORKFLOWS & FINDINGS
+// ============================================================================
+
+/**
+ * EnergyAudit: Main audit record (EN 16247-1 compliant)
+ */
+entity EnergyAudit {
+  auditCode String required unique
+  auditStartDate LocalDate required
+  auditEndDate LocalDate
+  auditType AuditType // "MANDATORY", "VOLUNTARY", "FOLLOW_UP"
+  leadAuditor String required
+  supportingAuditors String maxlength(1000)
+  referenceStartDate LocalDate required
+  referenceEndDate LocalDate required
+  auditStatus AuditState // "PLANNED", "IN_PROGRESS", "COMPLETED", "SUBMITTED", "APPROVED"
+  regulatoryRequirement RegulatoryRequirement // "EED_10_85_TJ", "EED_OVER_85_TJ", "ISO_50001"
+  complianceFramework String
+  totalEnergyConsumptionTJ BigDecimal
+  totalEnergyConsumptionkWh BigDecimal
+  estimatedAnnualSavingsTJ BigDecimal
+  estimatedCostSavingsEUR BigDecimal
+  estimatedROIPercent BigDecimal
+  reportGenerated Boolean 
+  reportGeneratedDate Instant
+  reportPath String maxlength(1000)
+  createdAt Instant
+  updatedAt Instant
+}
+
+enum AuditType {
+  MANDATORY, VOLUNTARY, FOLLOW_UP
+}
+
+enum RegulatoryRequirement {
+  EED_10_85_TJ, EED_OVER_85_TJ, ISO_50001
+}
+
+enum AuditState {
+  PLANNED, IN_PROGRESS, COMPLETED, SUBMITTED, APPROVED
+}
+
+relationship ManyToOne {
+  EnergyAudit{site} to Site
+}
+
+/**
+ * AuditFinding: Energy-saving opportunities identified in audit
+ * Includes ROI calculations and implementation tracking
+ */
+entity AuditFinding {
+  findingCode String required
+  findingTitle String required
+  category AuditFindingCategory // "HEATING", "COOLING", "LIGHTING", "MOTORS", "PROCESS", "CONTROL", "OTHER"
+  description String required maxlength(2000)
+  currentStatus String maxlength(500)
+  recommendedAction String required maxlength(2000)
+  technicalParameters String maxlength(1000)
+  estimatedAnnualEnergySavingsTJ BigDecimal
+  estimatedAnnualEnergySavingskWh BigDecimal
+  estimatedAnnualCostSavingsEUR BigDecimal
+  estimatedImplementationCostEUR BigDecimal
+  paybackPeriodYears Double
+  estimatedROIPercent Double
+  priority AuditFindingPriority // "HIGH", "MEDIUM", "LOW"
+  feasibility AuditFindingFeasibility // "EASY", "MEDIUM", "DIFFICULT", "NOT_FEASIBLE"
+  implementationTimeline ImplementationTimeline // "IMMEDIATE", "SHORT_TERM", "MEDIUM_TERM", "LONG_TERM"
+  fundingAvailable FundingAvailable // "NONE", "NATIONAL_GRANT", "EU_FUNDS", "ESCO", "OTHER"
+  fundingSource String maxlength(500)
+  status AuditFindingStatus // "IDENTIFIED", "RECOMMENDED", "IN_PROGRESS", "IMPLEMENTED", "REJECTED"
+  evidencePhotoPath String maxlength(1000)
+  referenceMaterial String maxlength(1000)
+  createdAt Instant
+  updatedAt Instant
+  affectedMeterCount Integer              // NEW: Track scope
+}
+
+enum AuditFindingCategory {
+  HEATING, COOLING, LIGHTING, MOTORS, PROCESS, CONTROL, OTHER
+}
+
+enum AuditFindingStatus {
+  IDENTIFIED, RECOMMENDED, IN_PROGRESS, IMPLEMENTED, REJECTED
+}
+
+enum FundingAvailable {
+  NONE, NATIONAL_GRANT, EU_FUNDS, ESCO, OTHER
+}
+
+enum ImplementationTimeline {
+  IMMEDIATE, SHORT_TERM, MEDIUM_TERM, LONG_TERM
+}
+
+enum AuditFindingFeasibility {
+  EASY, MEDIUM, DIFFICULT, NOT_FEASIBLE
+}
+
+enum AuditFindingPriority {
+  HIGH, MEDIUM, LOW
+}
+
+relationship ManyToOne {
+  AuditFinding{audit required} to EnergyAudit
+  AuditFinding{primaryMeter} to Meter     // NEW: Primary equipment affected
+  AuditFinding{site} to Site              // NEW: Alternative reference
+}
+
+relationship ManyToMany {
+  AuditFinding{affectedMeters} to Meter{relatedFindings}  // NEW: Complex scenarios
+}
+
+/**
+ * AuditChecklist: EN 16247-1 compliance checklist
+ * Ensures auditor covers all required aspects
+ */
+entity AuditChecklist {
+  checklistItemCode String required
+  checklistItemTitle String required
+  category AuditChecklistCategory // "BUILDING_ENVELOPE", "HEATING_SYSTEM", "COOLING", "LIGHTING", "MOTORS", "PROCESS", "CONTROL_SYSTEMS"
+  isMandatory Boolean 
+  regulatoryReference String maxlength(255)
+  description String maxlength(1000)
+  guidance String maxlength(2000)
+  expectedDocumentation String maxlength(500)
+  isCompleted Boolean 
+  completedBy String maxlength(255)
+  completedDate LocalDate
+  comments String maxlength(1000)
+  createdAt Instant
+  updatedAt Instant
+}
+
+enum AuditChecklistCategory {
+  BUILDING_ENVELOPE, HEATING_SYSTEM, COOLING, LIGHTING, MOTORS, PROCESS, CONTROL_SYSTEMS
+}
+
+relationship ManyToOne {
+  AuditChecklist{audit} to EnergyAudit
+}
+
+/**
+ * AuditEvidence: Supporting documents and materials
+ */
+entity AuditEvidence {
+  evidenceCode String required
+  evidenceTitle String required
+  fileName String required
+  fileType FileType // "IMAGE", "PDF", "DOCUMENT", "SPREADSHEET", "VIDEO", "OTHER"
+  filePath String required
+  fileSize Long
+  category AuditEvidenceCategory // "METER_PHOTO", "EQUIPMENT_PHOTO", "TECHNICAL_DRAWING", "INVOICE", "CONTRACT", "CERTIFICATE", "OTHER"
+//  relatedFinding String maxlength(255)
+  uploadedBy String required
+  uploadedAt Instant required
+  description String maxlength(1000)
+  createdAt Instant
+  updatedAt Instant
+}
+
+enum FileType {
+  IMAGE, PDF, DOCUMENT, SPREADSHEET, VIDEO, OTHER
+}
+
+enum AuditEvidenceCategory {
+  METER_PHOTO, EQUIPMENT_PHOTO, TECHNICAL_DRAWING, INVOICE, CONTRACT, CERTIFICATE, OTHER
+}
+
+relationship ManyToOne {
+  AuditEvidence{audit} to EnergyAudit
+}
+
+relationship ManyToOne {
+  AuditEvidence{finding} to AuditFinding
+}
+
+// ============================================================================
+// 4. REGULATORY TEMPLATES & COUNTRY-SPECIFIC REQUIREMENTS
+// ============================================================================
+
+/**
+ * RegulatoryTemplate: Country-specific audit report templates
+ * Enables multi-country compliance with localized reporting requirements
+ */
+entity RegulatoryTemplate {
+  templateCode String required unique
+  templateName String required
+  country String required minlength(2) maxlength(2)
+  regulatoryFramework RegulatoryTemplateType required // "EU_EED", "ISO_50001", "DATA_CENTER", "CUSTOM"
+  validFromDate LocalDate required
+  validUntilDate LocalDate
+  reportFormat ReportFormatStandard // "EN_16247_1_PDF", "ISO_50001_PDF", "CUSTOM_FORMAT"
+  requiredSections String maxlength(2000) // JSON or CSV: mandatory sections
+  calculationMethodology String maxlength(2000) // Energy normalization rules
+  mandatorySEUThreshold BigDecimal
+  mandatoryCO2Reporting Boolean
+  mandatoryCostAnalysis Boolean
+  submissionDeadlineMonths Integer
+  submissionFormat SubmissionFormatType // "PDF", "XML", "ONLINE_PORTAL", "PAPER"
+  submissionAuthority String maxlength(255)
+  submissionURL String maxlength(1000)
+  recordRetentionYears Integer
+  reportLanguage String maxlength(5)
+  version String maxlength(20)
+  description String maxlength(1000)
+  createdAt Instant
+  updatedAt Instant
+  status RegulatoryTemplateStatus // "ACTIVE", "DEPRECATED", "DRAFT"
+}
+
+enum RegulatoryTemplateType {
+  EU_EED, ISO_50001, DATA_CENTER, CUSTOM
+}
+
+enum ReportFormatStandard {
+  EN_16247_1_PDF, ISO_50001_PDF, CUSTOM_FORMAT
+}
+
+enum SubmissionFormatType { 
+  PDF, XML, ONLINE_PORTAL, PAPER
+}
+
+enum RegulatoryTemplateStatus {
+  ACTIVE, DEPRECATED, DRAFT
+}
+
+/**
+ * CalculationRule: SEU (Specific Energy Use) calculation per country
+ */
+entity CalculationRule {
+  ruleCode String required unique
+  ruleName String required
+  country String required
+  applicableToSiteType CalculationSiteType // "MANUFACTURING", "OFFICE", "WAREHOUSE", "ALL"
+  applicableToIndustry String maxlength(128)
+  formulaDescription String required maxlength(2000)
+  normalizationFactor CalculationNormalizationFactor // "CLIMATE_ADJUSTED", "PRODUCTION_ADJUSTED", "NONE"
+  benchmarkValue BigDecimal
+  climateAdjustmentFactors String maxlength(1000) // JSON format
+  productionVolumeFactor BigDecimal
+  calculationFormula String maxlength(2000) // Pseudocode
+  createdAt Instant
+  updatedAt Instant
+}
+
+enum CalculationSiteType {
+  MANUFACTURING, OFFICE, WAREHOUSE, ALL
+}
+
+enum CalculationNormalizationFactor {
+  CLIMATE_ADJUSTED, PRODUCTION_ADJUSTED, NONE
+}
+
+relationship ManyToOne {
+  CalculationRule{template} to RegulatoryTemplate
+}
+
+/**
+ * CountryRequirement: Detailed regulatory requirements per country
+ */
+entity CountryRequirement {
+  requirementCode String required
+  requirementTitle String required
+  country String required minlength(2) maxlength(2)
+  regulatorySource RegulatorySource // "EU_EED", "NATIONAL_LAW", "INDUSTRY_STANDARD"
+  sourceReference String maxlength(500)
+  description String required maxlength(2000)
+  applicableSiteType String maxlength(255)
+  energyThresholdTJ BigDecimal
+  implementationGuidance String maxlength(2000)
+  deadline LocalDate
+  referenceDocumentURL String maxlength(1000)
+  contactAuthority String maxlength(255)
+  createdAt Instant
+  updatedAt Instant
+}
+
+enum RegulatorySource {
+  EU_EED, NATIONAL_LAW, INDUSTRY_STANDARD
+}
+
+relationship ManyToOne {
+  CountryRequirement{template} to RegulatoryTemplate
+}
+
+// ============================================================================
+// 5. VISUALIZATION & TIME-SERIES DATA
+// ============================================================================
+
+/**
+ * ConsumptionTrend: Pre-computed aggregates for dashboards
+ * Optimized for time-series visualization
+ */
+entity ConsumptionTrend {
+  trendDate LocalDate required
+  aggregationPeriod AggregationPeriod // "DAILY", "WEEKLY", "MONTHLY", "QUARTERLY", "YEARLY"
+  energyConsumptionkWh BigDecimal
+  energyConsumptionTJ BigDecimal
+  specificEnergyUsekWhM2 BigDecimal
+  costPerUnit BigDecimal
+  comparedToPreviousPeriod BigDecimal
+  trend ConsumptionTrendDirection // "INCREASING", "DECREASING", "STABLE"
+  ambientTemperatureC BigDecimal
+  isClimateAdjusted Boolean
+  createdAt Instant
+  updatedAt Instant
+}
+
+enum AggregationPeriod {
+  DAILY, WEEKLY, MONTHLY, QUARTERLY, YEARLY
+}
+
+enum ConsumptionTrendDirection {
+  INCREASING, DECREASING, STABLE
+}
+
+relationship ManyToOne {
+  ConsumptionTrend{site} to Site
+  ConsumptionTrend{meter} to Meter
+}
+
+/**
+ * EnergyBenchmark: Industry benchmarks for comparison
+ */
+entity EnergyBenchmark {
+  benchmarkCode String required unique
+  country String required
+  industry String required
+  siteType String maxlength(128)
+  typicalEnergyUsekWhM2 BigDecimal
+  medianEnergyUsekWhM2 BigDecimal
+  bestInClasskWhM2 BigDecimal
+  sourceDataYear Integer
+  numberOfFacilitiesInSample Integer
+  description String maxlength(1000)
+  sourceReference String maxlength(255)
+  createdAt Instant
+  updatedAt Instant
+}
+
+relationship ManyToOne {
+  EnergyBenchmark{company} to Company
+}
+
+// ============================================================================
+// 6. DOCUMENT GENERATION METADATA
+// ============================================================================
+
+/**
+ * ReportGeneration: Tracks report generation events with version control
+ */
+entity ReportGeneration {
+  reportCode String required unique
+  reportType ReportType required // "EN_16247_1", "ISO_50001", "MANAGEMENT_SUMMARY", "TECHNICAL_REPORT"
+  reportFormat ReportFormat // "PDF", "WORD", "HTML"
+  generatedAt Instant required
+  generatedBy String required
+  reportTitle String maxlength(500)
+  reportFileName String maxlength(500)
+  reportFilePath String maxlength(1000)
+  reportFileSize Long
+  regulatoryTemplateUsed String maxlength(255)
+  country String maxlength(2)
+  includeFindings Boolean 
+  includeRecommendations Boolean 
+  includeCostAnalysis Boolean 
+  includeCharts Boolean 
+  confidentialityLevel ConfidentialityLevel // "PUBLIC", "INTERNAL", "CONFIDENTIAL"
+  reportStatus ReportState // "DRAFT", "FINAL", "SUBMITTED", "APPROVED"
+  submittedAt Instant
+  submittedTo String maxlength(255)
+  version Integer
+  previousVersionPath String maxlength(1000)
+  notes String maxlength(1000)
+  createdAt Instant
+  updatedAt Instant
+}
+
+enum ConfidentialityLevel {
+  PUBLIC, INTERNAL, CONFIDENTIAL
+}
+
+enum ReportType {
+  EN_16247_1, ISO_50001, MANAGEMENT_SUMMARY, TECHNICAL_REPORT
+}
+
+enum ReportFormat {
+  PDF, WORD, HTML
+}
+
+enum ReportState {
+  DRAFT, FINAL, SUBMITTED, APPROVED
+}
+
+relationship ManyToOne {
+  ReportGeneration{audit required} to EnergyAudit
+}
+
+/**
+ * ExportLog: Tracks data export events for audit trail
+ */
+entity ExportLog {
+  exportCode String required unique
+  exportType ExportType // "PDF_REPORT", "EXCEL_DATA", "CSV_READINGS", "WORD_DOCUMENT"
+  exportFormat String maxlength(128)
+  exportedAt Instant required
+  exportedBy String required
+  exportedEntity ExportLogEntity // "AUDIT", "FINDINGS", "METER_READINGS", "SITE"
+  recordsExported Long
+  exportFileName String maxlength(500)
+  exportFilePath String maxlength(1000)
+  recipientEmail String pattern(/^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/)
+  purpose ExportPurpose // "REGULATORY_SUBMISSION", "MANAGEMENT_REVIEW", "CUSTOMER_DELIVERY"
+  createdAt Instant
+  updatedAt Instant
+}
+
+enum ExportLogEntity {
+  AUDIT, FINDINGS, METER_READINGS, SITE
+}
+
+enum ExportType {
+  PDF_REPORT, EXCEL_DATA, CSV_READINGS, WORD_DOCUMENT
+}
+
+enum ExportPurpose {
+  REGULATORY_SUBMISSION, MANAGEMENT_REVIEW, CUSTOMER_DELIVERY
+}
+
+relationship ManyToOne {
+  ExportLog{audit} to EnergyAudit
+}
+
+// ============================================================================
+// 7. USER & ROLE MANAGEMENT (Multi-Tenancy)
+// ============================================================================
+
+/**
+ * CompanyUser: User accounts linked to a Company (tenant)
+ */
+entity CompanyUser {
+  userEmail String required unique pattern(/^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/)
+  firstName String required
+  lastName String required
+  userRole UserRoles required // "ADMIN", "AUDITOR", "MANAGER", "VIEWER"
+  phoneNumber String maxlength(20)
+  isActive Boolean 
+  lastLoginAt Instant
+  createdAt Instant
+  updatedAt Instant
+}
+
+enum UserRoles {
+  ADMIN, AUDITOR, MANAGER, VIEWER
+}
+
+relationship ManyToOne {
+  CompanyUser{company} to Company
+}
+
+/**
+ * UserAuditAccess: Fine-grained access control per audit
+ */
+entity UserAuditAccess {
+  accessLevel AccessLevel // "VIEW_ONLY", "EDIT", "APPROVE", "ADMIN"
+  grantedAt Instant
+  grantedBy String maxlength(255)
+  expiresAt Instant
+}
+
+enum AccessLevel {
+  VIEW_ONLY, EDIT, APPROVE, ADMIN
+}
+
+relationship ManyToOne {
+  UserAuditAccess{user} to CompanyUser
+  UserAuditAccess{audit} to EnergyAudit
+}
+
+// ============================================================================
+// 8. RELATIONSHIPS SUMMARY
+// ============================================================================
+
+/**
+MULTI-TENANCY HIERARCHY:
+  Company (Root Tenant)
+    ├── Site (Multiple Sites)
+    │   ├── Meter (Multiple Meters)
+    │   │   ├── MeterReading (Time-series data)
+    │   │   └── ManualMeterEntry (Manual inputs)
+    │   ├── EnergyAudit (Audit records)
+    │   │   ├── AuditFinding (Savings opportunities)
+    │   │   ├── AuditChecklist (Compliance items)
+    │   │   ├── AuditEvidence (Supporting documents)
+    │   │   ├── ReportGeneration (Generated reports)
+    │   │   └── ExportLog (Export history)
+    │   └── CSVUpload (Data import tracking)
+    └── CompanyUser (Team members)
+        └── UserAuditAccess (Role-based permissions)
+
+REGULATORY FRAMEWORK:
+  RegulatoryTemplate (Country-specific template)
+    ├── CalculationRule (SEU calculation)
+    └── CountryRequirement (Specific requirements)
+
+VISUALIZATION & BENCHMARKING:
+  ConsumptionTrend (Dashboard aggregates)
+  EnergyBenchmark (Industry comparisons)
+*/
+
+// ============================================================================
+// 9. PAGINATION & SEARCH CONFIGURATION
+// ============================================================================
+
+// paginate all with pagination
+
+// ============================================================================
+// BIDIRECTIONAL RELATIONSHIPS (MANDATORY FOR JHIPSTER)
+// ============================================================================
+
+// TIER 1: Multi-Tenancy Core (Company → Sites, Users, Benchmarks)
+relationship OneToMany {
+  Company{sites} to Site{company}
+  Company{users} to CompanyUser{company}
+  Company{benchmarks} to EnergyBenchmark{company}
+}
+
+// TIER 2: Site → Operational Data (Meters, Audits, Imports, Trends)
+relationship OneToMany {
+  Site{meters} to Meter{site}
+  Site{audits} to EnergyAudit{site}
+  Site{csvUploads} to CSVUpload{site}
+  Site{trends} to ConsumptionTrend{site}
+}
+
+// TIER 3: Meter → Time-Series Data (Readings, Manual Entries, Trends)
+relationship OneToMany {
+  Meter{readings} to MeterReading{meter}
+  Meter{manualEntries} to ManualMeterEntry{meter}
+  Meter{trends} to ConsumptionTrend{meter}
+}
+
+// TIER 4: EnergyAudit → Audit Child Entities (Findings, Checklists, Evidence, Reports)
+relationship OneToMany {
+  EnergyAudit{findings} to AuditFinding{audit}
+  EnergyAudit{checklists} to AuditChecklist{audit}
+  EnergyAudit{evidence} to AuditEvidence{audit}
+  EnergyAudit{reports} to ReportGeneration{audit}
+  EnergyAudit{exports} to ExportLog{audit}
+  EnergyAudit{accessPermissions} to UserAuditAccess{audit}
+}
+
+// TIER 5: CompanyUser → Audit Access Permissions
+relationship OneToMany {
+  CompanyUser{auditAccess} to UserAuditAccess{user}
+}
+
+// TIER 6: Reference Data (RegulatoryTemplate → Rules & Requirements)
+relationship OneToMany {
+  RegulatoryTemplate{calculationRules} to CalculationRule{template}
+  RegulatoryTemplate{countryRequirements} to CountryRequirement{template}
+}
+
+// TIER 7: Audit Finding → Equipment Impact Tracking
+relationship OneToMany {
+  AuditFinding{affectedMeters} to Meter{relatedFindings}
+}
+
+// TIER 8: CSV Upload → Meter Readings (Traceability)
+relationship OneToMany {
+  CSVUpload{readings} to MeterReading{sourceUpload}
+}
+
+// TIER 9: Critical Multi-Tenancy Path (CSVUpload → Company for direct scoping)
+relationship ManyToOne {
+  CSVUpload{company required} to Company
+}
+
+
+// search EnergyAudit, AuditFinding, Site, Company with elasticsearch
+
+// ============================================================================
+// 10. SERVICE & DTO CONFIGURATION FOR JHIPSTER
+// ============================================================================
+
+// service all with serviceImpl
+
+// dto all with mapstruct
+
+// Skip angular and react will generate only backend initially if needed
+// Frontend can be added later via jhipster client command

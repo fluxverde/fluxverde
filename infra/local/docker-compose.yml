@@ -1,0 +1,104 @@
+# ==============================================================================
+# FLUXVERDE — Docker Compose
+# PostgreSQL 16 + TimescaleDB 2.x
+# ==============================================================================
+# Usage:
+#   Start:   docker-compose up -d
+#   Stop:    docker-compose down
+#   Logs:    docker-compose logs -f db
+#   Shell:   docker-compose exec db psql -U fluxverde -d fluxverde
+# ==============================================================================
+
+services:
+
+  # ── DATABASE: PostgreSQL 16 + TimescaleDB ───────────────────────────────────
+  db:
+    image: timescale/timescaledb:latest-pg16
+    container_name: fluxverde-db
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB:       fluxverde
+      POSTGRES_USER:     fluxverde
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme_in_production}
+
+      # TimescaleDB tuning — applied via postgresql.conf
+      TIMESCALEDB_TELEMETRY: "off"
+
+    ports:
+      # Expose only on localhost — do NOT expose 0.0.0.0 in production
+      - "127.0.0.1:5432:5432"
+
+    volumes:
+      # Persistent data volume — survives container restarts
+      - pgdata:/var/lib/postgresql/data
+
+      # Initialisation scripts — run once on first startup
+      - ./docker/db/init:/docker-entrypoint-initdb.d:ro
+
+      # Custom PostgreSQL config
+      - ./docker/db/postgresql.conf:/etc/postgresql/postgresql.conf:ro
+
+    command: >
+      postgres
+        -c config_file=/etc/postgresql/postgresql.conf
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fluxverde -d fluxverde"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+    networks:
+      - fluxverde-net
+
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
+
+  # ── DATABASE ADMIN UI (optional — disable in production) ───────────────────
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: fluxverde-pgadmin
+    restart: unless-stopped
+    profiles:
+      - dev          # only starts with: docker-compose --profile dev up
+
+    environment:
+      PGADMIN_DEFAULT_EMAIL:    admin@fluxverde.eu
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
+
+    ports:
+      - "127.0.0.1:5050:80"
+
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+      - ./docker/pgadmin/servers.json:/pgadmin4/servers.json:ro
+
+    depends_on:
+      db:
+        condition: service_healthy
+
+    networks:
+      - fluxverde-net
+
+# ── VOLUMES ────────────────────────────────────────────────────────────────────
+volumes:
+  pgdata:
+    driver: local
+    name: fluxverde_pgdata
+
+  pgadmin_data:
+    driver: local
+    name: fluxverde_pgadmin_data
+
+# ── NETWORKS ───────────────────────────────────────────────────────────────────
+networks:
+  fluxverde-net:
+    driver: bridge
+    name: fluxverde-net

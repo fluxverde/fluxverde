@@ -1,0 +1,14 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "Fluxverde DB (local)",
+      "Group": "Fluxverde",
+      "Host": "db",
+      "Port": 5432,
+      "MaintenanceDB": "fluxverde",
+      "Username": "fluxverde",
+      "SSLMode": "prefer",
+      "PassFile": "/pgpass"
+    }
+  }
+}

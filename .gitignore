@@ -1,0 +1,8 @@
+# Environment variables — never commit
+.env
+
+# Docker volumes data (if mounted locally)
+docker/db/data/
+
+# pgAdmin local data
+docker/pgadmin/data/
