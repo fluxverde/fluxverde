@@ -164,6 +164,7 @@
 							<inputSpec>${project.basedir}/src/main/resources/openapi/restinterface-api.yaml</inputSpec>
 							<generatorName>spring</generatorName>
 							<output>${project.build.directory}/generated-sources/openapi</output>
+							<addCompileSourceRoot>true</addCompileSourceRoot>
 							<apiPackage>io.fluxverde.rest.api</apiPackage>
 							<modelPackage>io.fluxverde.rest.model</modelPackage>
 							<modelNameSuffix>Model</modelNameSuffix>
