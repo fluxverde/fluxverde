@@ -166,7 +166,7 @@
 							<output>${project.build.directory}/generated-sources/openapi</output>
 							<apiPackage>io.fluxverde.rest.api</apiPackage>
 							<modelPackage>io.fluxverde.rest.model</modelPackage>
-							<modelNameSuffix>Api</modelNameSuffix>
+							<modelNameSuffix>Model</modelNameSuffix>
 							<skipValidateSpec>true</skipValidateSpec>
 							<globalProperties>
 								<apis></apis>
@@ -185,7 +185,7 @@
 								<apiNameSuffix>Api</apiNameSuffix>
 							</configOptions>
 							<additionalProperties>
-								<modelNameSuffix>Api</modelNameSuffix>
+								<modelNameSuffix>Model</modelNameSuffix>
 							</additionalProperties>
 							<generateSupportingFiles>true</generateSupportingFiles>
 						</configuration>

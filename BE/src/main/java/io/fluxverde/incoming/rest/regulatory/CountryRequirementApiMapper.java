@@ -1,13 +1,13 @@
 package io.fluxverde.incoming.rest.regulatory;
 
 import io.fluxverde.domain.regulatory.CountryRequirement;
-import io.fluxverde.rest.model.CountryRequirementApi;
+import io.fluxverde.rest.model.CountryRequirementModel;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")
 public interface CountryRequirementApiMapper {
-    CountryRequirement toDomain(CountryRequirementApi api);
+    CountryRequirement toDomain(CountryRequirementModel api);
 
-    CountryRequirementApi toApi(CountryRequirement domain);
+    CountryRequirementModel toApi(CountryRequirement domain);
 }
 

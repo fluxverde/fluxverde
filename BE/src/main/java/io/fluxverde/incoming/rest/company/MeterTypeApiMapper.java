@@ -1,13 +1,13 @@
 package io.fluxverde.incoming.rest.company;
 
 import io.fluxverde.domain.company.meter.MeterType;
-import io.fluxverde.rest.model.MeterTypeApi;
+import io.fluxverde.rest.model.MeterTypeModel;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")
 public interface MeterTypeApiMapper {
-    MeterType toDomain(MeterTypeApi api);
+    MeterType toDomain(MeterTypeModel api);
 
-    MeterTypeApi toApi(MeterType domain);
+    MeterTypeModel toApi(MeterType domain);
 }
 

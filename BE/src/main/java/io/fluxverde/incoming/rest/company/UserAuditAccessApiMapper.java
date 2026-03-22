@@ -1,13 +1,13 @@
 package io.fluxverde.incoming.rest.company;
 
 import io.fluxverde.domain.company.UserAuditAccess;
-import io.fluxverde.rest.model.UserAuditAccessApi;
+import io.fluxverde.rest.model.UserAuditAccessModel;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")
 public interface UserAuditAccessApiMapper {
-    UserAuditAccess toDomain(UserAuditAccessApi api);
+    UserAuditAccess toDomain(UserAuditAccessModel api);
 
-    UserAuditAccessApi toApi(UserAuditAccess domain);
+    UserAuditAccessModel toApi(UserAuditAccess domain);
 }
 

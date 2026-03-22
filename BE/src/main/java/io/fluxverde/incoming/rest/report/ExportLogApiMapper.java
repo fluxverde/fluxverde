@@ -1,13 +1,13 @@
 package io.fluxverde.incoming.rest.report;
 
 import io.fluxverde.domain.company.audit.ExportLog;
-import io.fluxverde.rest.model.ExportLogApi;
+import io.fluxverde.rest.model.ExportLogModel;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")
 public interface ExportLogApiMapper {
-    ExportLog toDomain(ExportLogApi api);
+    ExportLog toDomain(ExportLogModel api);
 
-    ExportLogApi toApi(ExportLog domain);
+    ExportLogModel toApi(ExportLog domain);
 }
 
