@@ -1,0 +1,2754 @@
+openapi: 3.0.3
+info:
+  title: FluxVerde Restinterface API
+  version: 1.0.0
+  description: Generated from fluxverde.jdl domain model.
+servers:
+  - url: /api
+paths:
+  /audit-checklists:
+    get:
+      summary: List AuditChecklist
+      operationId: listAuditChecklists
+      tags:
+        - AuditChecklist
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AuditChecklist"
+    post:
+      summary: Create AuditChecklist
+      operationId: createAuditChecklist
+      tags:
+        - AuditChecklist
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuditChecklist"
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuditChecklist"
+  /audit-checklists/{id}:
+    get:
+      summary: Get AuditChecklist by id
+      operationId: getAuditChecklistById
+      tags:
+        - AuditChecklist
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuditChecklist"
+        '404':
+          description: Not Found
+    put:
+      summary: Update AuditChecklist
+      operationId: updateAuditChecklist
+      tags:
+        - AuditChecklist
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuditChecklist"
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuditChecklist"
+    delete:
+      summary: Delete AuditChecklist
+      operationId: deleteAuditChecklist
+      tags:
+        - AuditChecklist
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Deleted
+  /audit-evidences:
+    get:
+      summary: List AuditEvidence
+      operationId: listAuditEvidences
+      tags:
+        - AuditEvidence
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AuditEvidence"
+    post:
+      summary: Create AuditEvidence
+      operationId: createAuditEvidence
+      tags:
+        - AuditEvidence
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuditEvidence"
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuditEvidence"
+  /audit-evidences/{id}:
+    get:
+      summary: Get AuditEvidence by id
+      operationId: getAuditEvidenceById
+      tags:
+        - AuditEvidence
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuditEvidence"
+        '404':
+          description: Not Found
+    put:
+      summary: Update AuditEvidence
+      operationId: updateAuditEvidence
+      tags:
+        - AuditEvidence
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuditEvidence"
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuditEvidence"
+    delete:
+      summary: Delete AuditEvidence
+      operationId: deleteAuditEvidence
+      tags:
+        - AuditEvidence
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Deleted
+  /audit-findings:
+    get:
+      summary: List AuditFinding
+      operationId: listAuditFindings
+      tags:
+        - AuditFinding
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AuditFinding"
+    post:
+      summary: Create AuditFinding
+      operationId: createAuditFinding
+      tags:
+        - AuditFinding
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuditFinding"
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuditFinding"
+  /audit-findings/{id}:
+    get:
+      summary: Get AuditFinding by id
+      operationId: getAuditFindingById
+      tags:
+        - AuditFinding
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuditFinding"
+        '404':
+          description: Not Found
+    put:
+      summary: Update AuditFinding
+      operationId: updateAuditFinding
+      tags:
+        - AuditFinding
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuditFinding"
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuditFinding"
+    delete:
+      summary: Delete AuditFinding
+      operationId: deleteAuditFinding
+      tags:
+        - AuditFinding
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Deleted
+  /c-s-v-uploads:
+    get:
+      summary: List CSVUpload
+      operationId: listCSVUploads
+      tags:
+        - CSVUpload
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CSVUpload"
+    post:
+      summary: Create CSVUpload
+      operationId: createCSVUpload
+      tags:
+        - CSVUpload
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CSVUpload"
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CSVUpload"
+  /c-s-v-uploads/{id}:
+    get:
+      summary: Get CSVUpload by id
+      operationId: getCSVUploadById
+      tags:
+        - CSVUpload
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CSVUpload"
+        '404':
+          description: Not Found
+    put:
+      summary: Update CSVUpload
+      operationId: updateCSVUpload
+      tags:
+        - CSVUpload
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CSVUpload"
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CSVUpload"
+    delete:
+      summary: Delete CSVUpload
+      operationId: deleteCSVUpload
+      tags:
+        - CSVUpload
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Deleted
+  /calculation-rules:
+    get:
+      summary: List CalculationRule
+      operationId: listCalculationRules
+      tags:
+        - CalculationRule
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CalculationRule"
+    post:
+      summary: Create CalculationRule
+      operationId: createCalculationRule
+      tags:
+        - CalculationRule
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CalculationRule"
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CalculationRule"
+  /calculation-rules/{id}:
+    get:
+      summary: Get CalculationRule by id
+      operationId: getCalculationRuleById
+      tags:
+        - CalculationRule
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CalculationRule"
+        '404':
+          description: Not Found
+    put:
+      summary: Update CalculationRule
+      operationId: updateCalculationRule
+      tags:
+        - CalculationRule
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CalculationRule"
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CalculationRule"
+    delete:
+      summary: Delete CalculationRule
+      operationId: deleteCalculationRule
+      tags:
+        - CalculationRule
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Deleted
+  /companies:
+    get:
+      summary: List Company
+      operationId: listCompanys
+      tags:
+        - Company
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Company"
+    post:
+      summary: Create Company
+      operationId: createCompany
+      tags:
+        - Company
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Company"
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Company"
+  /companies/{id}:
+    get:
+      summary: Get Company by id
+      operationId: getCompanyById
+      tags:
+        - Company
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Company"
+        '404':
+          description: Not Found
+    put:
+      summary: Update Company
+      operationId: updateCompany
+      tags:
+        - Company
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Company"
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Company"
+    delete:
+      summary: Delete Company
+      operationId: deleteCompany
+      tags:
+        - Company
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Deleted
+  /company-users:
+    get:
+      summary: List CompanyUser
+      operationId: listCompanyUsers
+      tags:
+        - CompanyUser
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CompanyUser"
+    post:
+      summary: Create CompanyUser
+      operationId: createCompanyUser
+      tags:
+        - CompanyUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CompanyUser"
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CompanyUser"
+  /company-users/{id}:
+    get:
+      summary: Get CompanyUser by id
+      operationId: getCompanyUserById
+      tags:
+        - CompanyUser
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CompanyUser"
+        '404':
+          description: Not Found
+    put:
+      summary: Update CompanyUser
+      operationId: updateCompanyUser
+      tags:
+        - CompanyUser
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CompanyUser"
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CompanyUser"
+    delete:
+      summary: Delete CompanyUser
+      operationId: deleteCompanyUser
+      tags:
+        - CompanyUser
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Deleted
+  /consumption-trends:
+    get:
+      summary: List ConsumptionTrend
+      operationId: listConsumptionTrends
+      tags:
+        - ConsumptionTrend
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ConsumptionTrend"
+    post:
+      summary: Create ConsumptionTrend
+      operationId: createConsumptionTrend
+      tags:
+        - ConsumptionTrend
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConsumptionTrend"
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConsumptionTrend"
+  /consumption-trends/{id}:
+    get:
+      summary: Get ConsumptionTrend by id
+      operationId: getConsumptionTrendById
+      tags:
+        - ConsumptionTrend
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConsumptionTrend"
+        '404':
+          description: Not Found
+    put:
+      summary: Update ConsumptionTrend
+      operationId: updateConsumptionTrend
+      tags:
+        - ConsumptionTrend
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConsumptionTrend"
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConsumptionTrend"
+    delete:
+      summary: Delete ConsumptionTrend
+      operationId: deleteConsumptionTrend
+      tags:
+        - ConsumptionTrend
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Deleted
+  /country-requirements:
+    get:
+      summary: List CountryRequirement
+      operationId: listCountryRequirements
+      tags:
+        - CountryRequirement
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CountryRequirement"
+    post:
+      summary: Create CountryRequirement
+      operationId: createCountryRequirement
+      tags:
+        - CountryRequirement
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CountryRequirement"
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CountryRequirement"
+  /country-requirements/{id}:
+    get:
+      summary: Get CountryRequirement by id
+      operationId: getCountryRequirementById
+      tags:
+        - CountryRequirement
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CountryRequirement"
+        '404':
+          description: Not Found
+    put:
+      summary: Update CountryRequirement
+      operationId: updateCountryRequirement
+      tags:
+        - CountryRequirement
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CountryRequirement"
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CountryRequirement"
+    delete:
+      summary: Delete CountryRequirement
+      operationId: deleteCountryRequirement
+      tags:
+        - CountryRequirement
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Deleted
+  /energy-audits:
+    get:
+      summary: List EnergyAudit
+      operationId: listEnergyAudits
+      tags:
+        - EnergyAudit
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/EnergyAudit"
+    post:
+      summary: Create EnergyAudit
+      operationId: createEnergyAudit
+      tags:
+        - EnergyAudit
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EnergyAudit"
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnergyAudit"
+  /energy-audits/{id}:
+    get:
+      summary: Get EnergyAudit by id
+      operationId: getEnergyAuditById
+      tags:
+        - EnergyAudit
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnergyAudit"
+        '404':
+          description: Not Found
+    put:
+      summary: Update EnergyAudit
+      operationId: updateEnergyAudit
+      tags:
+        - EnergyAudit
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EnergyAudit"
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnergyAudit"
+    delete:
+      summary: Delete EnergyAudit
+      operationId: deleteEnergyAudit
+      tags:
+        - EnergyAudit
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Deleted
+  /energy-benchmarks:
+    get:
+      summary: List EnergyBenchmark
+      operationId: listEnergyBenchmarks
+      tags:
+        - EnergyBenchmark
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/EnergyBenchmark"
+    post:
+      summary: Create EnergyBenchmark
+      operationId: createEnergyBenchmark
+      tags:
+        - EnergyBenchmark
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EnergyBenchmark"
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnergyBenchmark"
+  /energy-benchmarks/{id}:
+    get:
+      summary: Get EnergyBenchmark by id
+      operationId: getEnergyBenchmarkById
+      tags:
+        - EnergyBenchmark
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnergyBenchmark"
+        '404':
+          description: Not Found
+    put:
+      summary: Update EnergyBenchmark
+      operationId: updateEnergyBenchmark
+      tags:
+        - EnergyBenchmark
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EnergyBenchmark"
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnergyBenchmark"
+    delete:
+      summary: Delete EnergyBenchmark
+      operationId: deleteEnergyBenchmark
+      tags:
+        - EnergyBenchmark
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Deleted
+  /export-logs:
+    get:
+      summary: List ExportLog
+      operationId: listExportLogs
+      tags:
+        - ExportLog
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ExportLog"
+    post:
+      summary: Create ExportLog
+      operationId: createExportLog
+      tags:
+        - ExportLog
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExportLog"
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExportLog"
+  /export-logs/{id}:
+    get:
+      summary: Get ExportLog by id
+      operationId: getExportLogById
+      tags:
+        - ExportLog
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExportLog"
+        '404':
+          description: Not Found
+    put:
+      summary: Update ExportLog
+      operationId: updateExportLog
+      tags:
+        - ExportLog
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExportLog"
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExportLog"
+    delete:
+      summary: Delete ExportLog
+      operationId: deleteExportLog
+      tags:
+        - ExportLog
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Deleted
+  /manual-meter-entries:
+    get:
+      summary: List ManualMeterEntry
+      operationId: listManualMeterEntrys
+      tags:
+        - ManualMeterEntry
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ManualMeterEntry"
+    post:
+      summary: Create ManualMeterEntry
+      operationId: createManualMeterEntry
+      tags:
+        - ManualMeterEntry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ManualMeterEntry"
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ManualMeterEntry"
+  /manual-meter-entries/{id}:
+    get:
+      summary: Get ManualMeterEntry by id
+      operationId: getManualMeterEntryById
+      tags:
+        - ManualMeterEntry
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ManualMeterEntry"
+        '404':
+          description: Not Found
+    put:
+      summary: Update ManualMeterEntry
+      operationId: updateManualMeterEntry
+      tags:
+        - ManualMeterEntry
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ManualMeterEntry"
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ManualMeterEntry"
+    delete:
+      summary: Delete ManualMeterEntry
+      operationId: deleteManualMeterEntry
+      tags:
+        - ManualMeterEntry
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Deleted
+  /meters:
+    get:
+      summary: List Meter
+      operationId: listMeters
+      tags:
+        - Meter
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Meter"
+    post:
+      summary: Create Meter
+      operationId: createMeter
+      tags:
+        - Meter
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Meter"
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Meter"
+  /meters/{id}:
+    get:
+      summary: Get Meter by id
+      operationId: getMeterById
+      tags:
+        - Meter
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Meter"
+        '404':
+          description: Not Found
+    put:
+      summary: Update Meter
+      operationId: updateMeter
+      tags:
+        - Meter
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Meter"
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Meter"
+    delete:
+      summary: Delete Meter
+      operationId: deleteMeter
+      tags:
+        - Meter
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Deleted
+  /meter-readings:
+    get:
+      summary: List MeterReading
+      operationId: listMeterReadings
+      tags:
+        - MeterReading
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MeterReading"
+    post:
+      summary: Create MeterReading
+      operationId: createMeterReading
+      tags:
+        - MeterReading
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MeterReading"
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MeterReading"
+  /meter-readings/{id}:
+    get:
+      summary: Get MeterReading by id
+      operationId: getMeterReadingById
+      tags:
+        - MeterReading
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MeterReading"
+        '404':
+          description: Not Found
+    put:
+      summary: Update MeterReading
+      operationId: updateMeterReading
+      tags:
+        - MeterReading
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MeterReading"
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MeterReading"
+    delete:
+      summary: Delete MeterReading
+      operationId: deleteMeterReading
+      tags:
+        - MeterReading
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Deleted
+  /meter-types:
+    get:
+      summary: List MeterType
+      operationId: listMeterTypes
+      tags:
+        - MeterType
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MeterType"
+    post:
+      summary: Create MeterType
+      operationId: createMeterType
+      tags:
+        - MeterType
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MeterType"
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MeterType"
+  /meter-types/{id}:
+    get:
+      summary: Get MeterType by id
+      operationId: getMeterTypeById
+      tags:
+        - MeterType
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MeterType"
+        '404':
+          description: Not Found
+    put:
+      summary: Update MeterType
+      operationId: updateMeterType
+      tags:
+        - MeterType
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MeterType"
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MeterType"
+    delete:
+      summary: Delete MeterType
+      operationId: deleteMeterType
+      tags:
+        - MeterType
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Deleted
+  /regulatory-templates:
+    get:
+      summary: List RegulatoryTemplate
+      operationId: listRegulatoryTemplates
+      tags:
+        - RegulatoryTemplate
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RegulatoryTemplate"
+    post:
+      summary: Create RegulatoryTemplate
+      operationId: createRegulatoryTemplate
+      tags:
+        - RegulatoryTemplate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegulatoryTemplate"
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RegulatoryTemplate"
+  /regulatory-templates/{id}:
+    get:
+      summary: Get RegulatoryTemplate by id
+      operationId: getRegulatoryTemplateById
+      tags:
+        - RegulatoryTemplate
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RegulatoryTemplate"
+        '404':
+          description: Not Found
+    put:
+      summary: Update RegulatoryTemplate
+      operationId: updateRegulatoryTemplate
+      tags:
+        - RegulatoryTemplate
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegulatoryTemplate"
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RegulatoryTemplate"
+    delete:
+      summary: Delete RegulatoryTemplate
+      operationId: deleteRegulatoryTemplate
+      tags:
+        - RegulatoryTemplate
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Deleted
+  /report-generations:
+    get:
+      summary: List ReportGeneration
+      operationId: listReportGenerations
+      tags:
+        - ReportGeneration
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ReportGeneration"
+    post:
+      summary: Create ReportGeneration
+      operationId: createReportGeneration
+      tags:
+        - ReportGeneration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReportGeneration"
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReportGeneration"
+  /report-generations/{id}:
+    get:
+      summary: Get ReportGeneration by id
+      operationId: getReportGenerationById
+      tags:
+        - ReportGeneration
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReportGeneration"
+        '404':
+          description: Not Found
+    put:
+      summary: Update ReportGeneration
+      operationId: updateReportGeneration
+      tags:
+        - ReportGeneration
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReportGeneration"
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReportGeneration"
+    delete:
+      summary: Delete ReportGeneration
+      operationId: deleteReportGeneration
+      tags:
+        - ReportGeneration
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Deleted
+  /sites:
+    get:
+      summary: List Site
+      operationId: listSites
+      tags:
+        - Site
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Site"
+    post:
+      summary: Create Site
+      operationId: createSite
+      tags:
+        - Site
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Site"
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Site"
+  /sites/{id}:
+    get:
+      summary: Get Site by id
+      operationId: getSiteById
+      tags:
+        - Site
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Site"
+        '404':
+          description: Not Found
+    put:
+      summary: Update Site
+      operationId: updateSite
+      tags:
+        - Site
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Site"
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Site"
+    delete:
+      summary: Delete Site
+      operationId: deleteSite
+      tags:
+        - Site
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Deleted
+  /user-audit-accesses:
+    get:
+      summary: List UserAuditAccess
+      operationId: listUserAuditAccesss
+      tags:
+        - UserAuditAccess
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserAuditAccess"
+    post:
+      summary: Create UserAuditAccess
+      operationId: createUserAuditAccess
+      tags:
+        - UserAuditAccess
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserAuditAccess"
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserAuditAccess"
+  /user-audit-accesses/{id}:
+    get:
+      summary: Get UserAuditAccess by id
+      operationId: getUserAuditAccessById
+      tags:
+        - UserAuditAccess
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserAuditAccess"
+        '404':
+          description: Not Found
+    put:
+      summary: Update UserAuditAccess
+      operationId: updateUserAuditAccess
+      tags:
+        - UserAuditAccess
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserAuditAccess"
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserAuditAccess"
+    delete:
+      summary: Delete UserAuditAccess
+      operationId: deleteUserAuditAccess
+      tags:
+        - UserAuditAccess
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Deleted
+components:
+  schemas:
+    AuditChecklist:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        checklistItemCode:
+          type: string
+        checklistItemTitle:
+          type: string
+        category:
+          type: string
+        isMandatory:
+          type: boolean
+        regulatoryReference:
+          type: string
+        description:
+          type: string
+        guidance:
+          type: string
+        expectedDocumentation:
+          type: string
+        isCompleted:
+          type: boolean
+        completedBy:
+          type: string
+        completedDate:
+          type: string
+          format: date
+        comments:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        audit:
+          $ref: #/components/schemas/EnergyAudit
+    AuditEvidence:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        evidenceCode:
+          type: string
+        evidenceTitle:
+          type: string
+        fileName:
+          type: string
+        fileType:
+          type: string
+        filePath:
+          type: string
+        fileSize:
+          type: integer
+          format: int64
+        category:
+          type: string
+        uploadedBy:
+          type: string
+        uploadedAt:
+          type: string
+          format: date-time
+        description:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        audit:
+          $ref: #/components/schemas/EnergyAudit
+        finding:
+          $ref: #/components/schemas/AuditFinding
+    AuditFinding:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        findingCode:
+          type: string
+        findingTitle:
+          type: string
+        category:
+          type: string
+        description:
+          type: string
+        currentStatus:
+          type: string
+        recommendedAction:
+          type: string
+        technicalParameters:
+          type: string
+        estimatedAnnualEnergySavingsTJ:
+          type: number
+        estimatedAnnualEnergySavingskWh:
+          type: number
+        estimatedAnnualCostSavingsEUR:
+          type: number
+        estimatedImplementationCostEUR:
+          type: number
+        paybackPeriodYears:
+          type: number
+          format: double
+        estimatedROIPercent:
+          type: number
+          format: double
+        priority:
+          type: string
+        feasibility:
+          type: string
+        implementationTimeline:
+          type: string
+        fundingAvailable:
+          type: string
+        fundingSource:
+          type: string
+        status:
+          type: string
+        evidencePhotoPath:
+          type: string
+        referenceMaterial:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        affectedMeterCount:
+          type: integer
+          format: int32
+        audit:
+          $ref: #/components/schemas/EnergyAudit
+        primaryMeter:
+          $ref: #/components/schemas/Meter
+        site:
+          $ref: #/components/schemas/Site
+        affectedMeters:
+          type: array
+          items:
+            $ref: #/components/schemas/Meter
+    CSVUpload:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        fileName:
+          type: string
+        fileSize:
+          type: integer
+          format: int64
+        uploadedBy:
+          type: string
+        uploadTimestamp:
+          type: string
+          format: date-time
+        totalRecordsImported:
+          type: integer
+          format: int64
+        successfulRecords:
+          type: integer
+          format: int64
+        failedRecords:
+          type: integer
+          format: int64
+        skippedRecords:
+          type: integer
+          format: int64
+        importStatus:
+          type: string
+        errorLog:
+          type: string
+        isProcessed:
+          type: boolean
+        processedAt:
+          type: string
+          format: date-time
+        notes:
+          type: string
+        site:
+          $ref: #/components/schemas/Site
+        meterType:
+          $ref: #/components/schemas/MeterType
+        company:
+          $ref: #/components/schemas/Company
+    CalculationRule:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        ruleCode:
+          type: string
+        ruleName:
+          type: string
+        country:
+          type: string
+        applicableToSiteType:
+          type: string
+        applicableToIndustry:
+          type: string
+        formulaDescription:
+          type: string
+        normalizationFactor:
+          type: string
+        benchmarkValue:
+          type: number
+        climateAdjustmentFactors:
+          type: string
+        productionVolumeFactor:
+          type: number
+        calculationFormula:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        template:
+          $ref: #/components/schemas/RegulatoryTemplate
+    Company:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        companyName:
+          type: string
+        registrationNumber:
+          type: string
+        country:
+          type: string
+        legalRepresentative:
+          type: string
+        contactEmail:
+          type: string
+        contactPhone:
+          type: string
+        industry:
+          type: string
+        employeeCount:
+          type: integer
+          format: int32
+        annualRevenueMeur:
+          type: number
+        totalEnergyTjPerYear:
+          type: number
+        regulatoryObligation:
+          type: string
+        nextMandatoryAuditDate:
+          type: string
+          format: date
+        lastAuditDate:
+          type: string
+          format: date
+        auditMethodology:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        status:
+          type: string
+        sites:
+          type: array
+          items:
+            $ref: #/components/schemas/Site
+        users:
+          type: array
+          items:
+            $ref: #/components/schemas/CompanyUser
+        benchmarks:
+          type: array
+          items:
+            $ref: #/components/schemas/EnergyBenchmark
+    CompanyUser:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        userEmail:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        userRole:
+          type: string
+        phoneNumber:
+          type: string
+        isActive:
+          type: boolean
+        lastLoginAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        company:
+          $ref: #/components/schemas/Company
+    ConsumptionTrend:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        trendDate:
+          type: string
+          format: date
+        aggregationPeriod:
+          type: string
+        energyConsumptionkWh:
+          type: number
+        energyConsumptionTJ:
+          type: number
+        specificEnergyUsekWhM2:
+          type: number
+        costPerUnit:
+          type: number
+        comparedToPreviousPeriod:
+          type: number
+        trend:
+          type: string
+        ambientTemperatureC:
+          type: number
+        isClimateAdjusted:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        site:
+          $ref: #/components/schemas/Site
+        meter:
+          $ref: #/components/schemas/Meter
+    CountryRequirement:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        requirementCode:
+          type: string
+        requirementTitle:
+          type: string
+        country:
+          type: string
+        regulatorySource:
+          type: string
+        sourceReference:
+          type: string
+        description:
+          type: string
+        applicableSiteType:
+          type: string
+        energyThresholdTJ:
+          type: number
+        implementationGuidance:
+          type: string
+        deadline:
+          type: string
+          format: date
+        referenceDocumentURL:
+          type: string
+        contactAuthority:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        template:
+          $ref: #/components/schemas/RegulatoryTemplate
+    EnergyAudit:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        auditCode:
+          type: string
+        auditStartDate:
+          type: string
+          format: date
+        auditEndDate:
+          type: string
+          format: date
+        auditType:
+          type: string
+        leadAuditor:
+          type: string
+        supportingAuditors:
+          type: string
+        referenceStartDate:
+          type: string
+          format: date
+        referenceEndDate:
+          type: string
+          format: date
+        auditStatus:
+          type: string
+        regulatoryRequirement:
+          type: string
+        complianceFramework:
+          type: string
+        totalEnergyConsumptionTJ:
+          type: number
+        totalEnergyConsumptionkWh:
+          type: number
+        estimatedAnnualSavingsTJ:
+          type: number
+        estimatedCostSavingsEUR:
+          type: number
+        estimatedROIPercent:
+          type: number
+        reportGenerated:
+          type: boolean
+        reportGeneratedDate:
+          type: string
+          format: date-time
+        reportPath:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        site:
+          $ref: #/components/schemas/Site
+    EnergyBenchmark:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        benchmarkCode:
+          type: string
+        country:
+          type: string
+        industry:
+          type: string
+        siteType:
+          type: string
+        typicalEnergyUsekWhM2:
+          type: number
+        medianEnergyUsekWhM2:
+          type: number
+        bestInClasskWhM2:
+          type: number
+        sourceDataYear:
+          type: integer
+          format: int32
+        numberOfFacilitiesInSample:
+          type: integer
+          format: int32
+        description:
+          type: string
+        sourceReference:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        company:
+          $ref: #/components/schemas/Company
+    ExportLog:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        exportCode:
+          type: string
+        exportType:
+          type: string
+        exportFormat:
+          type: string
+        exportedAt:
+          type: string
+          format: date-time
+        exportedBy:
+          type: string
+        exportedEntity:
+          type: string
+        recordsExported:
+          type: integer
+          format: int64
+        exportFileName:
+          type: string
+        exportFilePath:
+          type: string
+        recipientEmail:
+          type: string
+        purpose:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        audit:
+          $ref: #/components/schemas/EnergyAudit
+    ManualMeterEntry:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        entryDate:
+          type: string
+          format: date
+        meterReadingValue:
+          type: number
+        unit:
+          type: string
+        enteredBy:
+          type: string
+        entryTimestamp:
+          type: string
+          format: date-time
+        verificationStatus:
+          type: string
+        verifiedBy:
+          type: string
+        verificationTimestamp:
+          type: string
+          format: date-time
+        notes:
+          type: string
+        correctionNotes:
+          type: string
+        sourceDocument:
+          type: string
+        meter:
+          $ref: #/components/schemas/Meter
+        enteredByUser:
+          $ref: #/components/schemas/CompanyUser
+        verifiedByUser:
+          $ref: #/components/schemas/CompanyUser
+    Meter:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        meterName:
+          type: string
+        meterCode:
+          type: string
+        meterSerialNumber:
+          type: string
+        manufacturer:
+          type: string
+        installationDate:
+          type: string
+          format: date
+        nominalPower:
+          type: integer
+          format: int32
+        accuracy:
+          type: string
+        location:
+          type: string
+        meterCategory:
+          type: string
+        collectionMethod:
+          type: string
+        readingFrequency:
+          type: string
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        site:
+          $ref: #/components/schemas/Site
+        meterType:
+          $ref: #/components/schemas/MeterType
+    MeterReading:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        readingTimestamp:
+          type: string
+          format: date-time
+        readingValue:
+          type: number
+        readingStatus:
+          type: string
+        confidence:
+          type: integer
+          format: int32
+        source:
+          type: string
+        enteredByUser:
+          type: string
+        enteredAt:
+          type: string
+          format: date-time
+        isOutlier:
+          type: boolean
+        anomalyReason:
+          type: string
+        notes:
+          type: string
+        batchId:
+          type: integer
+          format: int64
+        normalizedValue:
+          type: number
+        meter:
+          $ref: #/components/schemas/Meter
+        sourceUpload:
+          $ref: #/components/schemas/CSVUpload
+    MeterType:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        typeName:
+          type: string
+        unit:
+          type: string
+        category:
+          type: string
+        conversionFactorToTJ:
+          type: number
+        description:
+          type: string
+    RegulatoryTemplate:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        templateCode:
+          type: string
+        templateName:
+          type: string
+        country:
+          type: string
+        regulatoryFramework:
+          type: string
+        validFromDate:
+          type: string
+          format: date
+        validUntilDate:
+          type: string
+          format: date
+        reportFormat:
+          type: string
+        requiredSections:
+          type: string
+        calculationMethodology:
+          type: string
+        mandatorySEUThreshold:
+          type: number
+        mandatoryCO2Reporting:
+          type: boolean
+        mandatoryCostAnalysis:
+          type: boolean
+        submissionDeadlineMonths:
+          type: integer
+          format: int32
+        submissionFormat:
+          type: string
+        submissionAuthority:
+          type: string
+        submissionURL:
+          type: string
+        recordRetentionYears:
+          type: integer
+          format: int32
+        reportLanguage:
+          type: string
+        version:
+          type: string
+        description:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        status:
+          type: string
+    ReportGeneration:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        reportCode:
+          type: string
+        reportType:
+          type: string
+        reportFormat:
+          type: string
+        generatedAt:
+          type: string
+          format: date-time
+        generatedBy:
+          type: string
+        reportTitle:
+          type: string
+        reportFileName:
+          type: string
+        reportFilePath:
+          type: string
+        reportFileSize:
+          type: integer
+          format: int64
+        regulatoryTemplateUsed:
+          type: string
+        country:
+          type: string
+        includeFindings:
+          type: boolean
+        includeRecommendations:
+          type: boolean
+        includeCostAnalysis:
+          type: boolean
+        includeCharts:
+          type: boolean
+        confidentialityLevel:
+          type: string
+        reportStatus:
+          type: string
+        submittedAt:
+          type: string
+          format: date-time
+        submittedTo:
+          type: string
+        version:
+          type: integer
+          format: int32
+        previousVersionPath:
+          type: string
+        notes:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        audit:
+          $ref: #/components/schemas/EnergyAudit
+    Site:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        siteName:
+          type: string
+        siteCode:
+          type: string
+        address:
+          type: string
+        city:
+          type: string
+        postalCode:
+          type: string
+        country:
+          type: string
+        latitude:
+          type: number
+        longitude:
+          type: number
+        siteType:
+          type: string
+        productionProcess:
+          type: string
+        totalAreaM2:
+          type: integer
+          format: int32
+        estimatedAnnualConsumptionTJ:
+          type: number
+        estimatedAnnualConsumptionkWh:
+          type: number
+        lastAuditDate:
+          type: string
+          format: date
+        nextAuditDate:
+          type: string
+          format: date
+        auditStatus:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        status:
+          type: string
+    UserAuditAccess:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        accessLevel:
+          type: string
+        grantedAt:
+          type: string
+          format: date-time
+        grantedBy:
+          type: string
+        expiresAt:
+          type: string
+          format: date-time
+        user:
+          $ref: #/components/schemas/CompanyUser
+        audit:
+          $ref: #/components/schemas/EnergyAudit

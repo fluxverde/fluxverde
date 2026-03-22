@@ -149,6 +149,49 @@
 					</excludes>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.openapitools</groupId>
+				<artifactId>openapi-generator-maven-plugin</artifactId>
+				<version>7.6.0</version>
+				<executions>
+					<execution>
+						<id>generate-restinterface-api</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<inputSpec>${project.basedir}/src/main/resources/openapi/restinterface-api.yaml</inputSpec>
+							<generatorName>spring</generatorName>
+							<output>${project.build.directory}/generated-sources/openapi</output>
+							<apiPackage>io.fluxverde.rest.api</apiPackage>
+							<modelPackage>io.fluxverde.rest.model</modelPackage>
+							<modelNameSuffix>Api</modelNameSuffix>
+							<skipValidateSpec>true</skipValidateSpec>
+							<globalProperties>
+								<apis></apis>
+								<apiTests>false</apiTests>
+								<apiDocs>false</apiDocs>
+								<models></models>
+								<modelDocs>false</modelDocs>
+								<modelTests>false</modelTests>
+							</globalProperties>
+							<configOptions>
+								<interfaceOnly>true</interfaceOnly>
+								<useSpringBoot3>true</useSpringBoot3>
+								<useJakartaEe>true</useJakartaEe>
+								<openApiNullable>false</openApiNullable>
+								<useTags>true</useTags>
+								<apiNameSuffix>Api</apiNameSuffix>
+							</configOptions>
+							<additionalProperties>
+								<modelNameSuffix>Api</modelNameSuffix>
+							</additionalProperties>
+							<generateSupportingFiles>true</generateSupportingFiles>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 
