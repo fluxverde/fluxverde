@@ -6,3 +6,7 @@ docker/db/data/
 
 # pgAdmin local data
 docker/pgadmin/data/
+
+.idea/
+target/
+.mvn/
