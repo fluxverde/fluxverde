@@ -1,0 +1,24 @@
+:host {
+  display: block;
+}
+
+:host ::ng-deep .case-sidebar-drawer.p-drawer {
+  width: 20rem;
+  border: 0;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 28px 90px -42px rgba(6, 95, 70, 0.75);
+  backdrop-filter: blur(22px);
+}
+
+:host-context(.dark) ::ng-deep .case-sidebar-drawer.p-drawer {
+  background: rgba(2, 6, 23, 0.88);
+  box-shadow: 0 28px 90px -42px rgba(0, 0, 0, 0.92);
+}
+
+:host ::ng-deep .case-sidebar-drawer .p-drawer-header {
+  display: none;
+}
+
+:host ::ng-deep .case-sidebar-drawer .p-drawer-content {
+  padding: 0;
+}
