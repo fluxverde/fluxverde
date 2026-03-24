@@ -47,7 +47,7 @@
   </div>
 
   @if (loading()) {
-    <div class="grid gap-5 pt-5 lg:grid-cols-[1.1fr_.9fr]">
+    <div class="space-y-5 pt-5">
       <div class="overflow-hidden rounded-2xl border border-emerald-900/10 bg-white/80 dark:border-emerald-100/10 dark:bg-slate-900/40">
         <div class="grid grid-cols-4 gap-4 border-b border-emerald-900/10 px-4 py-3 dark:border-emerald-100/10">
           @for (item of [1, 2, 3, 4]; track item) {
@@ -79,7 +79,7 @@
       </p>
     </div>
   } @else {
-    <div class="grid gap-5 pt-5 lg:grid-cols-[1.1fr_.9fr]">
+    <div class="space-y-5 pt-5">
       <div class="overflow-hidden rounded-2xl border border-emerald-900/10 bg-white/82 shadow-[0_18px_50px_-34px_rgba(15,118,110,.65)] dark:border-emerald-100/10 dark:bg-slate-900/42 dark:shadow-none">
         <div class="overflow-x-auto">
           <table class="min-w-full border-collapse">
@@ -144,7 +144,7 @@
       </div>
 
       @if (selectedUpload(); as upload) {
-        <aside class="rounded-2xl border border-emerald-900/10 bg-white/78 p-5 shadow-[0_18px_50px_-34px_rgba(15,118,110,.65)] dark:border-emerald-100/10 dark:bg-slate-900/42 dark:shadow-none">
+        <section class="rounded-2xl border border-emerald-900/10 bg-white/78 p-5 shadow-[0_18px_50px_-34px_rgba(15,118,110,.65)] dark:border-emerald-100/10 dark:bg-slate-900/42 dark:shadow-none">
           <p class="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-800/70 dark:text-emerald-100/70">
             Upload details
           </p>
@@ -200,7 +200,7 @@
               <p class="mt-2 text-sm leading-6 text-rose-900 dark:text-rose-100">{{ upload.errorLog }}</p>
             </div>
           }
-        </aside>
+        </section>
       }
     </div>
   }

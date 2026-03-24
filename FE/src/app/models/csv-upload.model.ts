@@ -27,4 +27,16 @@ export interface CSVUploadModel {
   site?: SiteModel;
   meterType?: MeterTypeModel;
   company?: CompanyModel;
+  _links?: {
+    self?: { href: string };
+    site?: { href: string };
+    meterType?: { href: string };
+    company?: { href: string };
+  };
+}
+
+export interface CsvUploadEntityCollection {
+  _embedded?: {
+    cSVUploadEntities?: CSVUploadModel[];
+  };
 }

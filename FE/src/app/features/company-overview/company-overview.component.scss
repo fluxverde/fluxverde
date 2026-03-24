@@ -4,8 +4,19 @@
   display: block;
 }
 
+.company-layout {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (min-width: 1280px) {
+  .company-layout--with-sidebar {
+    margin-left: 16.5rem;
+  }
+}
+
 :host ::ng-deep .case-sidebar-drawer.p-drawer {
-  width: 20rem;
+  width: 15.5rem;
   border: 0;
   background: rgba(255, 255, 255, 0.88);
   box-shadow: 0 28px 90px -42px rgba(6, 95, 70, 0.75);
