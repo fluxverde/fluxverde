@@ -1,8 +1,8 @@
 package io.fluxverde.incoming.rest.company;
 
 import io.fluxverde.domain.company.Company;
-import io.fluxverde.rest.model.CompanyModel;
 import io.fluxverde.incoming.rest.ApiTimeMapper;
+import io.fluxverde.rest.model.CompanyModel;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 
@@ -12,4 +12,3 @@ public interface CompanyApiMapper {
 
     CompanyModel toApi(Company domain);
 }
-
