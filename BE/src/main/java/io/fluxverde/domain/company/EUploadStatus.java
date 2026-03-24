@@ -7,4 +7,3 @@ public enum EUploadStatus {
     PARTIAL_SUCCESS,
     FAILED
 }
-
