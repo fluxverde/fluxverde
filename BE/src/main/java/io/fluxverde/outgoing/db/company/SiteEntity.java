@@ -1,4 +1,4 @@
-package io.fluxverde.outgoing.db.company;
+ package io.fluxverde.outgoing.db.company;
 
 import io.fluxverde.domain.company.ESiteAuditStatus;
 import io.fluxverde.domain.company.ESiteStatus;
@@ -92,4 +92,8 @@ public class SiteEntity implements Serializable {
     @Enumerated(EnumType.STRING)
     @Column
     private ESiteStatus status;
+
+    @ManyToOne
+    @JoinColumn
+    private CompanyEntity company;
 }

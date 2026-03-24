@@ -1,0 +1,17 @@
+{
+  "name": "fluxverde-e2e",
+  "version": "1.0.0",
+  "private": true,
+  "description": "E2E tests for FluxVerde",
+  "scripts": {
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:debug": "playwright test --debug",
+    "test:headed": "playwright test --headed",
+    "report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.53.2",
+    "@types/node": "^24.0.0"
+  }
+}
