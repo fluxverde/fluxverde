@@ -6,8 +6,11 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DrawerModule } from 'primeng/drawer';
 import { combineLatest } from 'rxjs';
 import { CompanyModel } from '../../models/company.model';
+import { CSVUploadModel } from '../../models/csv-upload.model';
 import { CompanyService } from '../../services/company.service';
+import { CsvUploadService } from '../../services/csv-upload.service';
 import { ThemeService } from '../../services/theme.service';
+import { CsvUploadTaskListComponent } from '../evidence/csv-upload-task-list.component';
 
 interface CompanyField {
   label: string;
@@ -22,7 +25,7 @@ interface NavigationItem {
 @Component({
   selector: 'app-company-overview',
   standalone: true,
-  imports: [CommonModule, RouterLink, DrawerModule],
+  imports: [CommonModule, RouterLink, DrawerModule, CsvUploadTaskListComponent],
   templateUrl: './company-overview.component.html',
   styleUrl: './company-overview.component.scss',
 })
@@ -31,6 +34,7 @@ export class CompanyOverviewComponent {
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
   private readonly companyService = inject(CompanyService);
+  private readonly csvUploadService = inject(CsvUploadService);
   private readonly themeService = inject(ThemeService);
 
   protected readonly company = signal<CompanyModel | null>(null);
@@ -41,11 +45,14 @@ export class CompanyOverviewComponent {
   protected readonly drawerOpen = signal(true);
   protected readonly isLoading = signal(true);
   protected readonly errorMessage = signal<string | null>(null);
+  protected readonly csvUploads = signal<CSVUploadModel[]>([]);
+  protected readonly csvUploadsLoading = signal(false);
+  protected readonly csvUploadsError = signal<string | null>(null);
   protected readonly isDarkMode = computed(() => this.themeService.isDarkMode());
   protected readonly navigationItems: NavigationItem[] = [
     { label: 'Overview', section: 'overview' },
     { label: 'Documents', section: 'documents' },
-    { label: 'Evidence Ledger', section: 'evidence-ledger' },
+    { label: 'Evidence Ledger', section: 'evidence' },
     { label: 'Review Queue', section: 'review-queue' },
     { label: 'Analytics', section: 'analytics' },
     { label: 'Measures', section: 'measures' },
@@ -55,6 +62,7 @@ export class CompanyOverviewComponent {
     { label: 'Audit Log', section: 'audit-log' },
   ];
   protected readonly isOverviewSection = computed(() => this.currentSection() === 'overview');
+  protected readonly isEvidenceSection = computed(() => this.currentSection() === 'evidence');
   protected readonly currentSectionLabel = computed(
     () =>
       this.navigationItems.find((item) => item.section === this.currentSection())?.label ??
@@ -102,6 +110,10 @@ export class CompanyOverviewComponent {
         this.companyId.set(sanitizedCompanyId);
         this.companyIdInput.set(String(sanitizedCompanyId));
         this.loadCompany(sanitizedCompanyId);
+
+        if (currentSection === 'evidence') {
+          this.loadCsvUploads();
+        }
       });
   }
 
@@ -167,6 +179,29 @@ export class CompanyOverviewComponent {
             error.error?.message ??
               error.message ??
               'The company endpoint could not be reached.',
+          );
+        },
+      });
+  }
+
+  private loadCsvUploads(): void {
+    this.csvUploadsLoading.set(true);
+    this.csvUploadsError.set(null);
+
+    this.csvUploadService
+      .listCsvUploads()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (uploads) => {
+          this.csvUploads.set(uploads);
+          this.csvUploadsLoading.set(false);
+        },
+        error: (error: HttpErrorResponse) => {
+          this.csvUploadsLoading.set(false);
+          this.csvUploadsError.set(
+            error.error?.message ??
+              error.message ??
+              'The CSV uploads endpoint could not be reached.',
           );
         },
       });

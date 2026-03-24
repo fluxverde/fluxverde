@@ -118,7 +118,7 @@
 
     <section class="grid gap-6">
       <div class="space-y-6">
-        @if (!isOverviewSection()) {
+        @if (!isOverviewSection() && !isEvidenceSection()) {
           <section class="animate-[fadeIn_.72s_ease-out] rounded-[2rem] border border-white/70 bg-white/78 p-6 shadow-[0_24px_90px_-48px_rgba(15,118,110,.55)] backdrop-blur-xl dark:border-emerald-100/10 dark:bg-slate-950/50 dark:shadow-[0_24px_90px_-48px_rgba(0,0,0,.9)] sm:p-8">
             <p class="inline-flex rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-800 dark:border-emerald-100/10 dark:bg-emerald-900/25 dark:text-emerald-100">
               {{ currentSectionLabel() }}
@@ -132,90 +132,100 @@
           </section>
         }
 
-        <section class="animate-[fadeIn_.7s_ease-out] rounded-[2rem] border border-white/70 bg-white/78 p-6 shadow-[0_24px_90px_-48px_rgba(15,118,110,.55)] backdrop-blur-xl dark:border-emerald-100/10 dark:bg-slate-950/50 dark:shadow-[0_24px_90px_-48px_rgba(0,0,0,.9)] sm:p-8">
-          <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            <div class="space-y-3">
-              <p class="inline-flex w-fit items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-800 dark:border-emerald-100/10 dark:bg-emerald-900/25 dark:text-emerald-100">
-                Case {{ caseId() }}
-              </p>
-              <div>
-                <h1 class="font-display text-3xl font-extrabold tracking-tight text-emerald-950 dark:text-emerald-50 sm:text-4xl">
-                  @if (isLoading()) {
-                    Loading company
-                  } @else {
-                    {{ company()?.companyName || 'Company not available' }}
-                  }
-                </h1>
-                <p class="mt-2 max-w-2xl text-sm leading-6 text-emerald-950/70 dark:text-emerald-100/70">
-                  This section mirrors the React overview card, but it is driven by the backend
-                  <span class="font-semibold">/companies/{{ '{' }}id{{ '}' }}</span> endpoint and the
-                  <span class="font-semibold">CompanyModel</span> fields exposed by your OpenAPI.
+        @if (isEvidenceSection()) {
+          <app-csv-upload-task-list
+            [uploads]="csvUploads()"
+            [loading]="csvUploadsLoading()"
+            [errorMessage]="csvUploadsError()"
+          />
+        }
+
+        @if (isOverviewSection()) {
+          <section class="animate-[fadeIn_.7s_ease-out] rounded-[2rem] border border-white/70 bg-white/78 p-6 shadow-[0_24px_90px_-48px_rgba(15,118,110,.55)] backdrop-blur-xl dark:border-emerald-100/10 dark:bg-slate-950/50 dark:shadow-[0_24px_90px_-48px_rgba(0,0,0,.9)] sm:p-8">
+            <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+              <div class="space-y-3">
+                <p class="inline-flex w-fit items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-800 dark:border-emerald-100/10 dark:bg-emerald-900/25 dark:text-emerald-100">
+                  Case {{ caseId() }}
+                </p>
+                <div>
+                  <h1 class="font-display text-3xl font-extrabold tracking-tight text-emerald-950 dark:text-emerald-50 sm:text-4xl">
+                    @if (isLoading()) {
+                      Loading company
+                    } @else {
+                      {{ company()?.companyName || 'Company not available' }}
+                    }
+                  </h1>
+                  <p class="mt-2 max-w-2xl text-sm leading-6 text-emerald-950/70 dark:text-emerald-100/70">
+                    This section mirrors the React overview card, but it is driven by the backend
+                    <span class="font-semibold">/companies/{{ '{' }}id{{ '}' }}</span> endpoint and the
+                    <span class="font-semibold">CompanyModel</span> fields exposed by your OpenAPI.
+                  </p>
+                </div>
+              </div>
+
+              <div class="rounded-2xl border border-emerald-900/10 bg-emerald-50/80 px-4 py-3 text-right dark:border-emerald-100/10 dark:bg-emerald-900/20">
+                <p class="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-800/70 dark:text-emerald-100/70">Company ID</p>
+                <p class="mt-1 text-2xl font-extrabold text-emerald-950 dark:text-emerald-50">
+                  {{ companyId() }}
                 </p>
               </div>
             </div>
 
-            <div class="rounded-2xl border border-emerald-900/10 bg-emerald-50/80 px-4 py-3 text-right dark:border-emerald-100/10 dark:bg-emerald-900/20">
-              <p class="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-800/70 dark:text-emerald-100/70">Company ID</p>
-              <p class="mt-1 text-2xl font-extrabold text-emerald-950 dark:text-emerald-50">
-                {{ companyId() }}
-              </p>
+            <div class="mb-6 grid gap-4 rounded-[1.5rem] border border-emerald-900/10 bg-emerald-50/70 p-4 dark:border-emerald-100/10 dark:bg-slate-900/55 sm:grid-cols-[1fr_auto] sm:items-end">
+              <label class="block">
+                <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-emerald-800/70 dark:text-emerald-100/70">
+                  Load company from API
+                </span>
+                <input
+                  type="number"
+                  min="1"
+                  [value]="companyIdInput()"
+                  (input)="updateCompanyIdInput($any($event.target).value)"
+                  class="w-full rounded-2xl border border-emerald-900/15 bg-white px-4 py-3 text-base font-semibold text-emerald-950 outline-none transition focus:border-emerald-500 dark:border-emerald-100/15 dark:bg-slate-950/80 dark:text-emerald-50"
+                />
+              </label>
+              <button
+                type="button"
+                (click)="applyCompanyId()"
+                class="rounded-2xl bg-emerald-800 px-5 py-3 text-sm font-semibold text-white shadow-[0_14px_32px_-18px_rgba(6,95,70,.9)] transition hover:-translate-y-0.5 hover:bg-emerald-700 dark:bg-emerald-500 dark:text-slate-950 dark:hover:bg-emerald-400"
+              >
+                Load company
+              </button>
             </div>
-          </div>
 
-          <div class="mb-6 grid gap-4 rounded-[1.5rem] border border-emerald-900/10 bg-emerald-50/70 p-4 dark:border-emerald-100/10 dark:bg-slate-900/55 sm:grid-cols-[1fr_auto] sm:items-end">
-            <label class="block">
-              <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-emerald-800/70 dark:text-emerald-100/70">
-                Load company from API
-              </span>
-              <input
-                type="number"
-                min="1"
-                [value]="companyIdInput()"
-                (input)="updateCompanyIdInput($any($event.target).value)"
-                class="w-full rounded-2xl border border-emerald-900/15 bg-white px-4 py-3 text-base font-semibold text-emerald-950 outline-none transition focus:border-emerald-500 dark:border-emerald-100/15 dark:bg-slate-950/80 dark:text-emerald-50"
-              />
-            </label>
-            <button
-              type="button"
-              (click)="applyCompanyId()"
-              class="rounded-2xl bg-emerald-800 px-5 py-3 text-sm font-semibold text-white shadow-[0_14px_32px_-18px_rgba(6,95,70,.9)] transition hover:-translate-y-0.5 hover:bg-emerald-700 dark:bg-emerald-500 dark:text-slate-950 dark:hover:bg-emerald-400"
-            >
-              Load company
-            </button>
-          </div>
-
-          @if (isLoading()) {
-            <div class="fv-card">
-              <div class="fv-card__grid">
-                @for (item of [1, 2, 3, 4, 5, 6, 7, 8, 9]; track item) {
-                  <div>
-                    <div class="h-2.5 w-20 rounded-full bg-emerald-100 dark:bg-emerald-100/10"></div>
-                    <div class="mt-2 h-4 w-32 rounded-full bg-emerald-200 dark:bg-emerald-100/15"></div>
-                  </div>
-                }
+            @if (isLoading()) {
+              <div class="fv-card">
+                <div class="fv-card__grid">
+                  @for (item of [1, 2, 3, 4, 5, 6, 7, 8, 9]; track item) {
+                    <div>
+                      <div class="h-2.5 w-20 rounded-full bg-emerald-100 dark:bg-emerald-100/10"></div>
+                      <div class="mt-2 h-4 w-32 rounded-full bg-emerald-200 dark:bg-emerald-100/15"></div>
+                    </div>
+                  }
+                </div>
               </div>
-            </div>
-          } @else if (company()) {
-            <article class="fv-card">
-              <div class="fv-card__grid">
-                @for (field of companyFields(); track field.label) {
-                  <div class="fv-card__item">
-                    <p class="fv-card__label">
-                      {{ field.label }}
-                    </p>
-                    <p class="fv-card__value">
-                      {{ field.value }}
-                    </p>
-                  </div>
-                }
+            } @else if (company()) {
+              <article class="fv-card">
+                <div class="fv-card__grid">
+                  @for (field of companyFields(); track field.label) {
+                    <div class="fv-card__item">
+                      <p class="fv-card__label">
+                        {{ field.label }}
+                      </p>
+                      <p class="fv-card__value">
+                        {{ field.value }}
+                      </p>
+                    </div>
+                  }
+                </div>
+              </article>
+            } @else {
+              <div class="rounded-[1.75rem] border border-amber-300/60 bg-amber-50 px-5 py-5 text-sm leading-6 text-amber-950 dark:border-amber-300/20 dark:bg-amber-500/10 dark:text-amber-100">
+                {{ errorMessage() }}
               </div>
-            </article>
-          } @else {
-            <div class="rounded-[1.75rem] border border-amber-300/60 bg-amber-50 px-5 py-5 text-sm leading-6 text-amber-950 dark:border-amber-300/20 dark:bg-amber-500/10 dark:text-amber-100">
-              {{ errorMessage() }}
-            </div>
-          }
-        </section>
+            }
+          </section>
+        }
       </div>
     </section>
 
