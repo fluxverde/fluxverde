@@ -13,6 +13,12 @@
 - After each non-trivial code change, Copilot should run a compile check.
 - Copilot should ask before destructive commands (for example: deleting files, hard resets, force pushes).
 
+## 4. Date/Time and Timezone (UTC Only)
+- Internally, all date/time values must be stored, processed, and exchanged in UTC.
+- Use timezone-safe types (for example `Instant`) for persisted timestamps.
+- Do not use local system timezone for internal logic.
+- Timezone conversion to local time is only allowed at UI/presentation boundaries.
+
 ---
 
 These rules should be followed for all entity classes in this project to ensure consistency and best practices.

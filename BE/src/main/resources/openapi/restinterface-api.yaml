@@ -1946,7 +1946,7 @@ components:
           type: string
           format: date-time
         audit:
-          $ref: #/components/schemas/EnergyAudit
+          $ref: "#/components/schemas/EnergyAudit"
     AuditEvidence:
       type: object
       properties:
@@ -1982,9 +1982,9 @@ components:
           type: string
           format: date-time
         audit:
-          $ref: #/components/schemas/EnergyAudit
+          $ref: "#/components/schemas/EnergyAudit"
         finding:
-          $ref: #/components/schemas/AuditFinding
+          $ref: "#/components/schemas/AuditFinding"
     AuditFinding:
       type: object
       properties:
@@ -2045,15 +2045,15 @@ components:
           type: integer
           format: int32
         audit:
-          $ref: #/components/schemas/EnergyAudit
+          $ref: "#/components/schemas/EnergyAudit"
         primaryMeter:
-          $ref: #/components/schemas/Meter
+          $ref: "#/components/schemas/Meter"
         site:
-          $ref: #/components/schemas/Site
+          $ref: "#/components/schemas/Site"
         affectedMeters:
           type: array
           items:
-            $ref: #/components/schemas/Meter
+            $ref: "#/components/schemas/Meter"
     CSVUpload:
       type: object
       properties:
@@ -2094,11 +2094,11 @@ components:
         notes:
           type: string
         site:
-          $ref: #/components/schemas/Site
+          $ref: "#/components/schemas/Site"
         meterType:
-          $ref: #/components/schemas/MeterType
+          $ref: "#/components/schemas/MeterType"
         company:
-          $ref: #/components/schemas/Company
+          $ref: "#/components/schemas/Company"
     CalculationRule:
       type: object
       properties:
@@ -2134,7 +2134,7 @@ components:
           type: string
           format: date-time
         template:
-          $ref: #/components/schemas/RegulatoryTemplate
+          $ref: "#/components/schemas/RegulatoryTemplate"
     Company:
       type: object
       properties:
@@ -2183,15 +2183,15 @@ components:
         sites:
           type: array
           items:
-            $ref: #/components/schemas/Site
+            $ref: "#/components/schemas/Site"
         users:
           type: array
           items:
-            $ref: #/components/schemas/CompanyUser
+            $ref: "#/components/schemas/CompanyUser"
         benchmarks:
           type: array
           items:
-            $ref: #/components/schemas/EnergyBenchmark
+            $ref: "#/components/schemas/EnergyBenchmark"
     CompanyUser:
       type: object
       properties:
@@ -2220,7 +2220,7 @@ components:
           type: string
           format: date-time
         company:
-          $ref: #/components/schemas/Company
+          $ref: "#/components/schemas/Company"
     ConsumptionTrend:
       type: object
       properties:
@@ -2255,9 +2255,9 @@ components:
           type: string
           format: date-time
         site:
-          $ref: #/components/schemas/Site
+          $ref: "#/components/schemas/Site"
         meter:
-          $ref: #/components/schemas/Meter
+          $ref: "#/components/schemas/Meter"
     CountryRequirement:
       type: object
       properties:
@@ -2296,7 +2296,7 @@ components:
           type: string
           format: date-time
         template:
-          $ref: #/components/schemas/RegulatoryTemplate
+          $ref: "#/components/schemas/RegulatoryTemplate"
     EnergyAudit:
       type: object
       properties:
@@ -2353,7 +2353,7 @@ components:
           type: string
           format: date-time
         site:
-          $ref: #/components/schemas/Site
+          $ref: "#/components/schemas/Site"
     EnergyBenchmark:
       type: object
       properties:
@@ -2391,7 +2391,7 @@ components:
           type: string
           format: date-time
         company:
-          $ref: #/components/schemas/Company
+          $ref: "#/components/schemas/Company"
     ExportLog:
       type: object
       properties:
@@ -2429,7 +2429,7 @@ components:
           type: string
           format: date-time
         audit:
-          $ref: #/components/schemas/EnergyAudit
+          $ref: "#/components/schemas/EnergyAudit"
     ManualMeterEntry:
       type: object
       properties:
@@ -2462,11 +2462,11 @@ components:
         sourceDocument:
           type: string
         meter:
-          $ref: #/components/schemas/Meter
+          $ref: "#/components/schemas/Meter"
         enteredByUser:
-          $ref: #/components/schemas/CompanyUser
+          $ref: "#/components/schemas/CompanyUser"
         verifiedByUser:
-          $ref: #/components/schemas/CompanyUser
+          $ref: "#/components/schemas/CompanyUser"
     Meter:
       type: object
       properties:
@@ -2506,9 +2506,9 @@ components:
           type: string
           format: date-time
         site:
-          $ref: #/components/schemas/Site
+          $ref: "#/components/schemas/Site"
         meterType:
-          $ref: #/components/schemas/MeterType
+          $ref: "#/components/schemas/MeterType"
     MeterReading:
       type: object
       properties:
@@ -2544,9 +2544,9 @@ components:
         normalizedValue:
           type: number
         meter:
-          $ref: #/components/schemas/Meter
+          $ref: "#/components/schemas/Meter"
         sourceUpload:
-          $ref: #/components/schemas/CSVUpload
+          $ref: "#/components/schemas/CSVUpload"
     MeterType:
       type: object
       properties:
@@ -2682,7 +2682,7 @@ components:
           type: string
           format: date-time
         audit:
-          $ref: #/components/schemas/EnergyAudit
+          $ref: "#/components/schemas/EnergyAudit"
     Site:
       type: object
       properties:
@@ -2749,6 +2749,6 @@ components:
           type: string
           format: date-time
         user:
-          $ref: #/components/schemas/CompanyUser
+          $ref: "#/components/schemas/CompanyUser"
         audit:
-          $ref: #/components/schemas/EnergyAudit
+          $ref: "#/components/schemas/EnergyAudit"
