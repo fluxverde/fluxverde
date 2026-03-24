@@ -7,6 +7,7 @@ import { CSVUploadModel } from '../../models/csv-upload.model';
   standalone: true,
   imports: [CommonModule, DatePipe, DecimalPipe],
   templateUrl: './csv-upload-task-list.component.html',
+  styleUrl: './csv-upload-task-list.component.scss',
 })
 export class CsvUploadTaskListComponent {
   readonly uploads = input<CSVUploadModel[]>([]);
@@ -29,7 +30,7 @@ export class CsvUploadTaskListComponent {
 
   protected readonly filteredUploads = computed(() => {
     const searchTerm = this.searchTerm().trim().toLowerCase();
-    const selectedStatus = this.selectedStatus();
+    const selectedStatus = this.selectedStatus().toLowerCase();
 
     return this.uploads().filter((upload) => {
       const matchesStatus =

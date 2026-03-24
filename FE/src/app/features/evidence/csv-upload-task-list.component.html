@@ -48,7 +48,7 @@
 
   @if (loading()) {
     <div class="space-y-5 pt-5">
-      <div class="overflow-hidden rounded-2xl border border-emerald-900/10 bg-white/80 dark:border-emerald-100/10 dark:bg-slate-900/40">
+      <div class="fv-tasklist">
         <div class="grid grid-cols-4 gap-4 border-b border-emerald-900/10 px-4 py-3 dark:border-emerald-100/10">
           @for (item of [1, 2, 3, 4]; track item) {
             <div class="h-3 w-20 rounded-full bg-emerald-100 dark:bg-emerald-100/10"></div>
@@ -80,60 +80,57 @@
     </div>
   } @else {
     <div class="space-y-5 pt-5">
-      <div class="overflow-hidden rounded-2xl border border-emerald-900/10 bg-white/82 shadow-[0_18px_50px_-34px_rgba(15,118,110,.65)] dark:border-emerald-100/10 dark:bg-slate-900/42 dark:shadow-none">
-        <div class="overflow-x-auto">
-          <table class="min-w-full border-collapse">
+      <div class="fv-tasklist">
+        <div class="fv-tasklist__scroll">
+          <table class="fv-tasklist__table">
             <thead>
-              <tr class="border-b border-emerald-900/10 bg-emerald-50/80 dark:border-emerald-100/10 dark:bg-slate-950/55">
-                <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-emerald-100/55">ID</th>
-                <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-emerald-100/55">File</th>
-                <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-emerald-100/55">Uploader</th>
-                <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-emerald-100/55">Uploaded</th>
-                <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-emerald-100/55">Records</th>
-                <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-emerald-100/55">Status</th>
-                <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-emerald-100/55">Processed</th>
-                <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-emerald-100/55">Updated</th>
+              <tr class="fv-tasklist__head-row">
+                <th class="fv-tasklist__head-cell">ID</th>
+                <th class="fv-tasklist__head-cell">File</th>
+                <th class="fv-tasklist__head-cell">Uploader</th>
+                <th class="fv-tasklist__head-cell">Uploaded</th>
+                <th class="fv-tasklist__head-cell">Records</th>
+                <th class="fv-tasklist__head-cell">Status</th>
+                <th class="fv-tasklist__head-cell">Processed</th>
+                <th class="fv-tasklist__head-cell">Updated</th>
               </tr>
             </thead>
             <tbody>
               @for (upload of filteredUploads(); track upload.id ?? upload.fileName) {
                 <tr
-                  class="cursor-pointer border-b border-emerald-900/8 transition last:border-b-0 dark:border-emerald-100/8"
-                  [class.bg-emerald-50]="isSelected(upload)"
-                  [class.hover:bg-emerald-50/70]="!isSelected(upload)"
-                  [class.dark:bg-emerald-400/10]="isSelected(upload)"
-                  [class.dark:hover:bg-slate-900/70]="!isSelected(upload)"
+                  class="fv-tasklist__row"
+                  [class.fv-tasklist__row--selected]="isSelected(upload)"
                   (click)="selectUpload(upload.id)"
                 >
-                  <td class="px-4 py-3 text-sm font-semibold text-slate-900 dark:text-emerald-50">
+                  <td class="fv-tasklist__cell fv-tasklist__cell--strong">
                     {{ upload.id ?? '—' }}
                   </td>
-                  <td class="px-4 py-3 text-sm font-semibold text-slate-900 dark:text-emerald-50">
-                    <div class="min-w-[15rem]">
-                      <p class="truncate">{{ upload.fileName || 'Unnamed file' }}</p>
-                      <p class="mt-1 text-xs font-medium text-slate-500 dark:text-emerald-100/55">
+                  <td class="fv-tasklist__cell fv-tasklist__cell--strong">
+                    <div class="fv-tasklist__file">
+                      <p class="fv-tasklist__file-name">{{ upload.fileName || 'Unnamed file' }}</p>
+                      <p class="fv-tasklist__file-meta">
                         {{ upload.company?.companyName || 'No company linked' }}
                       </p>
                     </div>
                   </td>
-                  <td class="px-4 py-3 text-sm text-slate-700 dark:text-emerald-100/75">
+                  <td class="fv-tasklist__cell">
                     {{ upload.uploadedBy || '—' }}
                   </td>
-                  <td class="px-4 py-3 text-sm text-slate-700 dark:text-emerald-100/75">
+                  <td class="fv-tasklist__cell">
                     {{ upload.uploadTimestamp | date: 'M/d/y' }}
                   </td>
-                  <td class="px-4 py-3 text-sm text-slate-700 dark:text-emerald-100/75">
+                  <td class="fv-tasklist__cell">
                     {{ upload.totalRecordsImported ?? 0 | number }}
                   </td>
-                  <td class="px-4 py-3">
-                    <span class="rounded-full px-2 py-1 text-[10px] font-bold uppercase tracking-[0.16em]" [class]="statusClass(upload.importStatus)">
+                  <td class="fv-tasklist__cell">
+                    <span class="fv-tasklist__chip" [class]="statusClass(upload.importStatus)">
                       {{ formatStatus(upload.importStatus) }}
                     </span>
                   </td>
-                  <td class="px-4 py-3 text-sm text-slate-700 dark:text-emerald-100/75">
+                  <td class="fv-tasklist__cell">
                     {{ upload.isProcessed ? 'Yes' : 'No' }}
                   </td>
-                  <td class="px-4 py-3 text-sm text-slate-700 dark:text-emerald-100/75">
+                  <td class="fv-tasklist__cell">
                     {{ (upload.processedAt || upload.uploadTimestamp) | date: 'M/d/y' }}
                   </td>
                 </tr>
