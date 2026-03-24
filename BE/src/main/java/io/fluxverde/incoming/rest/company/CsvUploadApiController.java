@@ -16,29 +16,29 @@ public class CsvUploadApiController implements CsvUploadApi {
     private final CSVUploadApiMapper mapper;
 
     @Override
-    public ResponseEntity<CSVUploadModel> createCsvUpload(CSVUploadModel csvUploadApi) {
-        CSVUploadModel created = mapper.toApi(service.create(mapper.toDomain(csvUploadApi)));
+    public ResponseEntity<CSVUploadModel> createCSVUpload(CSVUploadModel csVUploadModel) {
+        CSVUploadModel created = mapper.toApi(service.create(mapper.toDomain(csVUploadModel)));
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
     @Override
-    public ResponseEntity<Void> deleteCsvUpload(Long id) {
+    public ResponseEntity<Void> deleteCSVUpload(Long id) {
         return service.delete(id) ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
 
     @Override
-    public ResponseEntity<CSVUploadModel> getCsvUploadById(Long id) {
+    public ResponseEntity<CSVUploadModel> getCSVUploadById(Long id) {
         return service.findById(id).map(mapper::toApi).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
     @Override
-    public ResponseEntity<List<CSVUploadModel>> listCsvUploads() {
+    public ResponseEntity<List<CSVUploadModel>> listCSVUploads() {
         return ResponseEntity.ok(service.findAll().stream().map(mapper::toApi).toList());
     }
 
     @Override
-    public ResponseEntity<CSVUploadModel> updateCsvUpload(Long id, CSVUploadModel csvUploadApi) {
-        return service.update(id, mapper.toDomain(csvUploadApi))
+    public ResponseEntity<CSVUploadModel> updateCSVUpload(Long id, CSVUploadModel csVUploadModel) {
+        return service.update(id, mapper.toDomain(csVUploadModel))
             .map(mapper::toApi)
             .map(ResponseEntity::ok)
             .orElse(ResponseEntity.notFound().build());
