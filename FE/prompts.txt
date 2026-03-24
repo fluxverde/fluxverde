@@ -1,0 +1,7 @@
+please have alook at
+  https://auditai-frontend-342109712917.us-central1.run.app/cases/CASE-005/overview the sou
+  rce code is here: https://github.com/Leooo-Huang/AuditOS/tree/main/frontend but I want you
+  to use this angular project, not react. I want you to rebuild the company info using the
+  company endpoint described at: http://localhost:8080/v3/api-docs
+
+  

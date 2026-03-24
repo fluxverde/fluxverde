@@ -57,3 +57,30 @@ Angular CLI does not come with an end-to-end testing framework by default. You c
 ## Additional Resources
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+
+## Frontend Styling Rules
+
+### Clear Division of Responsibility
+
+The cleanest way to avoid conflicts is to establish a firm rule for what each system owns:
+
+```text
+Tailwind owns:
+├── Page layout (sidebar, main area, grid)
+├── Spacing (margin, padding, gap)
+├── Typography (font size, weight, color)
+├── Custom cards and panels
+├── Status badges and tags
+├── Dark/light surface colors
+└── Responsive breakpoints
+
+PrimeNG owns:
+├── p-table (data grid with sort/filter/pagination)
+├── p-chart (Chart.js wrapper)
+├── p-calendar (date range picker)
+├── p-dialog (modal windows)
+├── p-fileUpload (CSV drag & drop)
+├── p-toast (notifications)
+├── p-steps (audit workflow stepper)
+└── p-dropdown / p-multiSelect
+```

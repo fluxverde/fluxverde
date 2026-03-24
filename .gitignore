@@ -15,3 +15,9 @@ e2e/node_modules/
 e2e/dist/
 e2e/playwright-report/
 e2e/test-results/
+
+FE/.angular/cache
+FE/node_modules/
+FE/dist/
+FE/out-tsc/
+

@@ -1,10 +1,15 @@
-@use "sass:meta";
+/* Tailwind dark:* utilities follow html.dark instead of system media query. */
+@custom-variant dark (&:where(.dark, .dark *));
 
-@include meta.load-css("tailwindcss/theme");
-@include meta.load-css("tailwindcss/utilities");
+/* 1) Tailwind utilities without preflight resets */
+@config "../tailwind.config.js";
+@import "tailwindcss/theme.css";
+@import "tailwindcss/utilities.css";
 
-@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap");
+/* 2) PrimeNG icons (PrimeNG 21 no longer exports primeng/resources/primeng.css) */
+@import "primeicons/primeicons.css";
 
+/* 3) App global tokens and styles */
 :root {
 	--accent: #22c55e;
 	--highlight: #2dd4bf;
@@ -15,11 +20,24 @@ body {
 	margin: 0;
 	min-height: 100vh;
 	color: var(--ink);
-	font-family: "Manrope", "Segoe UI", sans-serif;
+	font-family:
+		"Manrope", "Avenir Next", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+	background: #f7fff9;
+	text-rendering: optimizeLegibility;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
 }
 
 .font-display {
-	font-family: "Manrope", "Segoe UI", sans-serif;
+	font-family:
+		"Manrope", "Avenir Next", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+}
+
+button,
+input,
+select,
+textarea {
+	font: inherit;
 }
 
 @keyframes fadeIn {
