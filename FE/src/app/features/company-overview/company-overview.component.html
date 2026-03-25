@@ -253,15 +253,109 @@
             }
 
             @if (isOverviewSites()) {
-              <div class="grid gap-6 xl:grid-cols-[minmax(0,23rem)_minmax(0,1fr)]">
+              @if (isSiteListMode()) {
+                <section class="rounded-[1.75rem] border border-white/70 bg-white/65 p-5 shadow-[0_18px_60px_-38px_rgba(15,118,110,.4)] dark:border-emerald-100/10 dark:bg-slate-950/35">
+                  <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                    <div>
+                      <p class="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-800/70 dark:text-emerald-100/70">
+                        Company sites
+                      </p>
+                      <h2 class="mt-2 text-2xl font-extrabold tracking-tight text-emerald-950 dark:text-emerald-50">
+                        Sites linked to this company
+                      </h2>
+                      <p class="mt-2 text-sm leading-6 text-emerald-950/70 dark:text-emerald-100/70">
+                        Records are loaded from the dedicated sites endpoint for the selected company.
+                      </p>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-3">
+                      <div class="rounded-2xl border border-emerald-900/10 bg-emerald-50/80 px-4 py-3 text-right dark:border-emerald-100/10 dark:bg-emerald-900/20">
+                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-800/70 dark:text-emerald-100/70">Site count</p>
+                        <p class="mt-1 text-2xl font-extrabold text-emerald-950 dark:text-emerald-50">
+                          {{ sites().length }}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        (click)="openCreateSiteForm()"
+                        class="rounded-2xl bg-emerald-800 px-5 py-3 text-sm font-semibold text-white shadow-[0_14px_32px_-18px_rgba(6,95,70,.9)] transition hover:-translate-y-0.5 hover:bg-emerald-700 dark:bg-emerald-500 dark:text-slate-950 dark:hover:bg-emerald-400"
+                      >
+                        Add site
+                      </button>
+                    </div>
+                  </div>
+
+                  @if (siteSubmitSuccess()) {
+                    <div class="mt-6 rounded-2xl border border-emerald-300/70 bg-emerald-50 px-4 py-3 text-sm leading-6 text-emerald-950 dark:border-emerald-300/20 dark:bg-emerald-500/10 dark:text-emerald-100">
+                      {{ siteSubmitSuccess() }}
+                    </div>
+                  }
+
+                  @if (sitesLoading()) {
+                    <div class="mt-6 grid gap-3">
+                      @for (item of [1, 2, 3]; track item) {
+                        <div class="h-24 rounded-[1.5rem] border border-emerald-900/10 bg-emerald-50/60 dark:border-emerald-100/10 dark:bg-slate-900/45"></div>
+                      }
+                    </div>
+                  } @else if (sitesError()) {
+                    <div class="mt-6 rounded-[1.75rem] border border-rose-300/60 bg-rose-50 px-5 py-5 text-sm leading-6 text-rose-950 dark:border-rose-300/20 dark:bg-rose-500/10 dark:text-rose-100">
+                      {{ sitesError() }}
+                    </div>
+                  } @else if (hasSites()) {
+                    <div class="mt-6 overflow-x-auto rounded-[1.5rem] border border-emerald-900/10 dark:border-emerald-100/10">
+                      <div class="site-table site-table--header">
+                        <span>Site</span>
+                        <span>Location</span>
+                        <span>Type</span>
+                        <span>Status</span>
+                        <span>Area</span>
+                        <span>Energy</span>
+                        <span>Actions</span>
+                      </div>
+
+                      @for (site of sites(); track trackSite($index, site)) {
+                        <div class="site-table">
+                          <div>
+                            <p class="font-semibold text-emerald-950 dark:text-emerald-50">
+                              {{ site.siteName || 'Unnamed site' }}
+                            </p>
+                            <p class="mt-1 text-xs uppercase tracking-[0.14em] text-emerald-800/65 dark:text-emerald-100/55">
+                              {{ site.siteCode || 'No code' }}
+                            </p>
+                          </div>
+                          <span>{{ formatSiteLocation(site) }}</span>
+                          <span>{{ site.siteType || '—' }}</span>
+                          <span>{{ site.status || '—' }}</span>
+                          <span>{{ site.totalAreaM2 ? site.totalAreaM2 + ' m²' : '—' }}</span>
+                          <span>{{ site.estimatedAnnualConsumptionTJ ? site.estimatedAnnualConsumptionTJ + ' TJ' : '—' }}</span>
+                          <div>
+                            <button
+                              type="button"
+                              (click)="openEditSiteForm(site)"
+                              class="inline-flex items-center gap-2 rounded-xl border border-emerald-900/10 bg-white/85 px-3 py-2 text-sm font-semibold text-emerald-900 transition hover:bg-emerald-50 dark:border-emerald-100/10 dark:bg-slate-900/70 dark:text-emerald-50 dark:hover:bg-slate-900"
+                              aria-label="Edit site"
+                            >
+                              <span aria-hidden="true">✎</span>
+                              <span>Edit</span>
+                            </button>
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  } @else {
+                    <div class="mt-6 rounded-[1.75rem] border border-dashed border-emerald-900/15 bg-emerald-50/60 px-5 py-8 text-sm leading-6 text-emerald-950/75 dark:border-emerald-100/15 dark:bg-slate-900/40 dark:text-emerald-100/75">
+                      No sites are attached to this company yet. Use Add site to create the first one.
+                    </div>
+                  }
+                </section>
+              } @else {
                 <section class="rounded-[1.75rem] border border-emerald-900/10 bg-emerald-50/70 p-5 dark:border-emerald-100/10 dark:bg-slate-900/45">
                   <div class="flex items-start justify-between gap-3">
                     <div>
                       <p class="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-800/70 dark:text-emerald-100/70">
-                        Add site
+                        {{ siteFormEyebrow() }}
                       </p>
                       <h2 class="mt-2 text-2xl font-extrabold tracking-tight text-emerald-950 dark:text-emerald-50">
-                        Register a company site
+                        {{ siteFormTitle() }}
                       </h2>
                     </div>
                     <div class="rounded-2xl border border-emerald-900/10 bg-white/80 px-3 py-2 text-right dark:border-emerald-100/10 dark:bg-slate-950/70">
@@ -333,18 +427,36 @@
                         <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-emerald-800/70 dark:text-emerald-100/70">
                           Site type
                         </span>
-                        <input type="text" formControlName="siteType" class="fv-input" />
+                        <select formControlName="siteType" class="fv-input">
+                          <option value="">Select site type</option>
+                          @for (siteType of siteTypeOptions(); track siteType) {
+                            <option [value]="siteType">{{ formatSiteTypeOption(siteType) }}</option>
+                          }
+                        </select>
+                        @if (siteTypesLoading()) {
+                          <p class="fv-input-hint">Loading site types from backend...</p>
+                        } @else if (siteTypesError()) {
+                          <p class="fv-input-error">{{ siteTypesError() }}</p>
+                        }
                       </label>
                     </div>
 
-                    <label class="block">
-                      <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-emerald-800/70 dark:text-emerald-100/70">
-                        Production process
-                      </span>
-                      <textarea rows="3" formControlName="productionProcess" class="fv-input fv-input--textarea"></textarea>
-                    </label>
-
                     <div class="grid gap-4 sm:grid-cols-2">
+                      <label class="block">
+                        <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-emerald-800/70 dark:text-emerald-100/70">
+                          Status
+                        </span>
+                        <select formControlName="status" class="fv-input">
+                          @for (status of siteStatusOptions(); track status) {
+                            <option [value]="status">{{ formatSiteTypeOption(status) }}</option>
+                          }
+                        </select>
+                        @if (siteStatusesLoading()) {
+                          <p class="fv-input-hint">Loading statuses from backend...</p>
+                        } @else if (siteStatusesError()) {
+                          <p class="fv-input-error">{{ siteStatusesError() }}</p>
+                        }
+                      </label>
                       <label class="block">
                         <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-emerald-800/70 dark:text-emerald-100/70">
                           Total area (m²)
@@ -360,95 +472,38 @@
                       </label>
                     </div>
 
+                    <label class="block">
+                      <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-emerald-800/70 dark:text-emerald-100/70">
+                        Production process
+                      </span>
+                      <textarea rows="3" formControlName="productionProcess" class="fv-input fv-input--textarea"></textarea>
+                    </label>
+
                     @if (siteSubmitError()) {
                       <div class="rounded-2xl border border-rose-300/70 bg-rose-50 px-4 py-3 text-sm leading-6 text-rose-950 dark:border-rose-300/20 dark:bg-rose-500/10 dark:text-rose-100">
                         {{ siteSubmitError() }}
                       </div>
                     }
 
-                    @if (siteSubmitSuccess()) {
-                      <div class="rounded-2xl border border-emerald-300/70 bg-emerald-50 px-4 py-3 text-sm leading-6 text-emerald-950 dark:border-emerald-300/20 dark:bg-emerald-500/10 dark:text-emerald-100">
-                        {{ siteSubmitSuccess() }}
-                      </div>
-                    }
-
-                    <button
-                      type="submit"
-                      [disabled]="siteSubmitting()"
-                      class="w-full rounded-2xl bg-emerald-800 px-5 py-3 text-sm font-semibold text-white shadow-[0_14px_32px_-18px_rgba(6,95,70,.9)] transition hover:-translate-y-0.5 hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-emerald-500 dark:text-slate-950 dark:hover:bg-emerald-400"
-                    >
-                      {{ siteSubmitting() ? 'Creating site...' : 'Create site' }}
-                    </button>
+                    <div class="flex flex-col gap-3 sm:flex-row sm:justify-end">
+                      <button
+                        type="button"
+                        (click)="cancelSiteForm()"
+                        class="rounded-2xl border border-emerald-900/10 bg-white/85 px-5 py-3 text-sm font-semibold text-emerald-900 transition hover:bg-emerald-50 dark:border-emerald-100/10 dark:bg-slate-900/70 dark:text-emerald-50 dark:hover:bg-slate-900"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        [disabled]="siteSubmitting()"
+                        class="rounded-2xl bg-emerald-800 px-5 py-3 text-sm font-semibold text-white shadow-[0_14px_32px_-18px_rgba(6,95,70,.9)] transition hover:-translate-y-0.5 hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-emerald-500 dark:text-slate-950 dark:hover:bg-emerald-400"
+                      >
+                        {{ siteSubmitLabel() }}
+                      </button>
+                    </div>
                   </form>
                 </section>
-
-                <section class="rounded-[1.75rem] border border-white/70 bg-white/65 p-5 shadow-[0_18px_60px_-38px_rgba(15,118,110,.4)] dark:border-emerald-100/10 dark:bg-slate-950/35">
-                  <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-                    <div>
-                      <p class="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-800/70 dark:text-emerald-100/70">
-                        Company sites
-                      </p>
-                      <h2 class="mt-2 text-2xl font-extrabold tracking-tight text-emerald-950 dark:text-emerald-50">
-                        Sites linked to this company
-                      </h2>
-                      <p class="mt-2 text-sm leading-6 text-emerald-950/70 dark:text-emerald-100/70">
-                        Records are loaded from the dedicated sites endpoint for the selected company. New records are appended here after a successful site create request.
-                      </p>
-                    </div>
-                    <div class="rounded-2xl border border-emerald-900/10 bg-emerald-50/80 px-4 py-3 text-right dark:border-emerald-100/10 dark:bg-emerald-900/20">
-                      <p class="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-800/70 dark:text-emerald-100/70">Site count</p>
-                      <p class="mt-1 text-2xl font-extrabold text-emerald-950 dark:text-emerald-50">
-                        {{ sites().length }}
-                      </p>
-                    </div>
-                  </div>
-
-                  @if (sitesLoading()) {
-                    <div class="mt-6 grid gap-3">
-                      @for (item of [1, 2, 3]; track item) {
-                        <div class="h-24 rounded-[1.5rem] border border-emerald-900/10 bg-emerald-50/60 dark:border-emerald-100/10 dark:bg-slate-900/45"></div>
-                      }
-                    </div>
-                  } @else if (sitesError()) {
-                    <div class="mt-6 rounded-[1.75rem] border border-rose-300/60 bg-rose-50 px-5 py-5 text-sm leading-6 text-rose-950 dark:border-rose-300/20 dark:bg-rose-500/10 dark:text-rose-100">
-                      {{ sitesError() }}
-                    </div>
-                  } @else if (hasSites()) {
-                    <div class="mt-6 overflow-hidden rounded-[1.5rem] border border-emerald-900/10 dark:border-emerald-100/10">
-                      <div class="site-table site-table--header">
-                        <span>Site</span>
-                        <span>Location</span>
-                        <span>Type</span>
-                        <span>Status</span>
-                        <span>Area</span>
-                        <span>Energy</span>
-                      </div>
-
-                      @for (site of sites(); track trackSite($index, site)) {
-                        <div class="site-table">
-                          <div>
-                            <p class="font-semibold text-emerald-950 dark:text-emerald-50">
-                              {{ site.siteName || 'Unnamed site' }}
-                            </p>
-                            <p class="mt-1 text-xs uppercase tracking-[0.14em] text-emerald-800/65 dark:text-emerald-100/55">
-                              {{ site.siteCode || 'No code' }}
-                            </p>
-                          </div>
-                          <span>{{ formatSiteLocation(site) }}</span>
-                          <span>{{ site.siteType || '—' }}</span>
-                          <span>{{ site.status || '—' }}</span>
-                          <span>{{ site.totalAreaM2 ? site.totalAreaM2 + ' m²' : '—' }}</span>
-                          <span>{{ site.estimatedAnnualConsumptionTJ ? site.estimatedAnnualConsumptionTJ + ' TJ' : '—' }}</span>
-                        </div>
-                      }
-                    </div>
-                  } @else {
-                    <div class="mt-6 rounded-[1.75rem] border border-dashed border-emerald-900/15 bg-emerald-50/60 px-5 py-8 text-sm leading-6 text-emerald-950/75 dark:border-emerald-100/15 dark:bg-slate-900/40 dark:text-emerald-100/75">
-                      No sites are attached to this company yet. Use the form to create the first one.
-                    </div>
-                  }
-                </section>
-              </div>
+              }
             }
           </section>
         }

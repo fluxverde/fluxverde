@@ -7,11 +7,13 @@
 .company-layout {
   margin-left: auto;
   margin-right: auto;
+  width: min(100%, 90rem);
 }
 
 @media (min-width: 1280px) {
   .company-layout--with-sidebar {
     margin-left: 16.5rem;
+    width: min(calc(100vw - 18.5rem), 90rem);
   }
 }
 
@@ -67,9 +69,17 @@
   color: rgb(190, 24, 93);
 }
 
+.fv-input-hint {
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(6, 78, 59, 0.72);
+}
+
 .site-table {
   display: grid;
-  grid-template-columns: minmax(12rem, 1.4fr) repeat(5, minmax(0, 1fr));
+  grid-template-columns: minmax(12rem, 1.6fr) repeat(5, minmax(0, 1fr)) minmax(7.5rem, 0.9fr);
+  min-width: 72rem;
   gap: 1rem;
   align-items: center;
   padding: 1rem 1.25rem;
@@ -103,6 +113,10 @@
   color: rgb(253, 164, 175);
 }
 
+:host-context(.dark) .fv-input-hint {
+  color: rgba(236, 253, 245, 0.68);
+}
+
 :host-context(.dark) .site-table {
   border-top-color: rgba(255, 255, 255, 0.08);
   background: rgba(2, 6, 23, 0.46);
@@ -117,6 +131,7 @@
 @media (max-width: 1023px) {
   .site-table {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    min-width: 0;
   }
 
   .site-table--header {

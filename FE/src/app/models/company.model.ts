@@ -30,6 +30,7 @@ export interface CreateSiteRequest {
   totalAreaM2?: number | null;
   estimatedAnnualConsumptionTJ?: number | null;
   estimatedAnnualConsumptionkWh?: number | null;
+  status?: string;
   companyId: number;
 }
 

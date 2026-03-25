@@ -67,11 +67,20 @@ export class CompanyOverviewComponent {
   protected readonly csvUploadsError = signal<string | null>(null);
   protected readonly overviewSubsection = signal<'summary' | 'sites'>('summary');
   protected readonly sites = signal<SiteModel[]>([]);
+  protected readonly siteEditorMode = signal<'list' | 'create' | 'edit'>('list');
+  protected readonly editingSiteId = signal<number | null>(null);
   protected readonly siteSubmitError = signal<string | null>(null);
   protected readonly siteSubmitSuccess = signal<string | null>(null);
   protected readonly siteSubmitting = signal(false);
   protected readonly sitesLoading = signal(false);
   protected readonly sitesError = signal<string | null>(null);
+  protected readonly sitesLoadedCompanyId = signal<number | null>(null);
+  protected readonly siteTypeOptions = signal<string[]>([]);
+  protected readonly siteTypesLoading = signal(false);
+  protected readonly siteTypesError = signal<string | null>(null);
+  protected readonly siteStatusOptions = signal<string[]>([]);
+  protected readonly siteStatusesLoading = signal(false);
+  protected readonly siteStatusesError = signal<string | null>(null);
   protected readonly isDarkMode = computed(() => this.themeService.isDarkMode());
   protected readonly navigationItems: NavigationItem[] = [
     { label: 'Overview', section: 'overview' },
@@ -95,6 +104,22 @@ export class CompanyOverviewComponent {
   protected readonly isEvidenceSection = computed(() => this.currentSection() === 'evidence');
   protected readonly isOverviewSummary = computed(() => this.overviewSubsection() === 'summary');
   protected readonly isOverviewSites = computed(() => this.overviewSubsection() === 'sites');
+  protected readonly isSiteListMode = computed(() => this.siteEditorMode() === 'list');
+  protected readonly isSiteCreateMode = computed(() => this.siteEditorMode() === 'create');
+  protected readonly isSiteEditMode = computed(() => this.siteEditorMode() === 'edit');
+  protected readonly siteFormTitle = computed(() =>
+    this.isSiteEditMode() ? 'Edit company site' : 'Register a company site',
+  );
+  protected readonly siteFormEyebrow = computed(() =>
+    this.isSiteEditMode() ? 'Edit site' : 'Add site',
+  );
+  protected readonly siteSubmitLabel = computed(() => {
+    if (this.siteSubmitting()) {
+      return this.isSiteEditMode() ? 'Saving changes...' : 'Creating site...';
+    }
+
+    return this.isSiteEditMode() ? 'Save changes' : 'Create site';
+  });
   protected readonly currentSectionLabel = computed(
     () =>
       this.navigationItems.find((item) => item.section === this.currentSection())?.label ??
@@ -137,6 +162,7 @@ export class CompanyOverviewComponent {
     address: [''],
     postalCode: [''],
     siteType: [''],
+    status: ['ACTIVE'],
     productionProcess: [''],
     totalAreaM2: [null as number | null],
     estimatedAnnualConsumptionTJ: [null as number | null],
@@ -146,6 +172,8 @@ export class CompanyOverviewComponent {
     combineLatest([this.route.paramMap, this.route.queryParamMap])
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(([params, queryParams]) => {
+        const previousCompanyId = this.companyId();
+        const previousSection = this.currentSection();
         const caseId = params.get('caseId') ?? 'CASE-005';
         const currentSection = params.get('section') ?? 'overview';
         const companyId = Number.parseInt(queryParams.get('companyId') ?? '1', 10);
@@ -153,16 +181,30 @@ export class CompanyOverviewComponent {
         const requestedOverviewSubsection = queryParams.get('overviewTab');
         const overviewSubsection =
           requestedOverviewSubsection === 'sites' ? 'sites' : 'summary';
+        const companyChanged = previousCompanyId !== sanitizedCompanyId || !this.company();
 
         this.caseId.set(caseId);
         this.currentSection.set(currentSection);
         this.overviewSubsection.set(overviewSubsection);
         this.companyId.set(sanitizedCompanyId);
         this.companyIdInput.set(String(sanitizedCompanyId));
-        this.loadCompany(sanitizedCompanyId);
-        this.loadSites(sanitizedCompanyId);
 
-        if (currentSection === 'evidence' || currentSection === 'audit-process') {
+        if (companyChanged) {
+          this.loadCompany(sanitizedCompanyId);
+        }
+
+        this.ensureSiteTypesLoaded();
+        this.ensureSiteStatusesLoaded();
+
+        if (currentSection === 'overview' && overviewSubsection === 'sites') {
+          this.ensureSitesLoaded();
+        }
+
+        if (
+          currentSection === 'evidence' ||
+          currentSection === 'audit-process' ||
+          previousSection !== currentSection
+        ) {
           this.loadCsvUploads();
         }
       });
@@ -178,6 +220,10 @@ export class CompanyOverviewComponent {
 
   protected setOverviewSubsection(subsection: 'summary' | 'sites'): void {
     this.overviewSubsection.set(subsection);
+
+    if (subsection === 'sites') {
+      this.ensureSitesLoaded();
+    }
 
     void this.router.navigate([], {
       relativeTo: this.route,
@@ -228,6 +274,7 @@ export class CompanyOverviewComponent {
       address: this.optionalValue(formValue.address),
       postalCode: this.optionalValue(formValue.postalCode),
       siteType: this.optionalValue(formValue.siteType),
+      status: this.optionalValue(formValue.status),
       productionProcess: this.optionalValue(formValue.productionProcess),
       totalAreaM2: formValue.totalAreaM2,
       estimatedAnnualConsumptionTJ: formValue.estimatedAnnualConsumptionTJ,
@@ -238,37 +285,68 @@ export class CompanyOverviewComponent {
     this.siteSubmitError.set(null);
     this.siteSubmitSuccess.set(null);
 
-    this.siteService
-      .createSite(payload)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (createdSite) => {
-          const site = { ...createdSite, companyId: createdSite.companyId ?? this.companyId() };
-          this.sites.update((sites) => [site, ...sites]);
-          this.siteSubmitting.set(false);
-          this.siteSubmitSuccess.set(`Site ${site.siteName ?? payload.siteName} created.`);
-          this.siteForm.reset({
-            siteName: '',
-            siteCode: '',
-            city: '',
-            country: payload.country,
-            address: '',
-            postalCode: '',
-            siteType: '',
-            productionProcess: '',
-            totalAreaM2: null,
-            estimatedAnnualConsumptionTJ: null,
-          });
-        },
-        error: (error: HttpErrorResponse) => {
-          this.siteSubmitting.set(false);
-          this.siteSubmitError.set(
-            error.error?.message ??
-              error.message ??
-              'The site could not be created. Verify that the backend is reachable and the payload matches the API.',
-          );
-        },
-      });
+    const editingSiteId = this.editingSiteId();
+    const request =
+      this.isSiteEditMode() && editingSiteId
+        ? this.siteService.updateSite(editingSiteId, payload)
+        : this.siteService.createSite(payload);
+
+    request.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (savedSite) => {
+        const site = { ...savedSite, companyId: savedSite.companyId ?? this.companyId() };
+        this.sites.update((sites) => this.upsertSite(sites, site));
+        this.siteSubmitting.set(false);
+        this.siteSubmitSuccess.set(
+          this.isSiteEditMode()
+            ? `Site ${site.siteName ?? payload.siteName} updated.`
+            : `Site ${site.siteName ?? payload.siteName} created.`,
+        );
+        this.closeSiteForm();
+      },
+      error: (error: HttpErrorResponse) => {
+        this.siteSubmitting.set(false);
+        this.siteSubmitError.set(
+          error.error?.message ??
+            error.message ??
+            (this.isSiteEditMode()
+              ? 'The site could not be updated. Verify that the backend is reachable and the payload matches the API.'
+              : 'The site could not be created. Verify that the backend is reachable and the payload matches the API.'),
+        );
+      },
+    });
+  }
+
+  protected openCreateSiteForm(): void {
+    this.siteEditorMode.set('create');
+    this.editingSiteId.set(null);
+    this.siteSubmitError.set(null);
+    this.siteSubmitSuccess.set(null);
+    this.resetSiteForm();
+  }
+
+  protected openEditSiteForm(site: SiteModel): void {
+    this.siteEditorMode.set('edit');
+    this.editingSiteId.set(site.id ?? null);
+    this.siteSubmitError.set(null);
+    this.siteSubmitSuccess.set(null);
+    this.siteForm.reset({
+      siteName: site.siteName ?? '',
+      siteCode: site.siteCode ?? '',
+      city: site.city ?? '',
+      country: site.country ?? 'AT',
+      address: site.address ?? '',
+      postalCode: site.postalCode ?? '',
+      siteType: site.siteType ?? '',
+      status: site.status ?? 'ACTIVE',
+      productionProcess: site.productionProcess ?? '',
+      totalAreaM2: site.totalAreaM2 ?? null,
+      estimatedAnnualConsumptionTJ: site.estimatedAnnualConsumptionTJ ?? null,
+    });
+  }
+
+  protected cancelSiteForm(): void {
+    this.siteSubmitError.set(null);
+    this.closeSiteForm();
   }
 
   protected formatSiteLocation(site: SiteModel): string {
@@ -284,12 +362,19 @@ export class CompanyOverviewComponent {
     return control.invalid && (control.dirty || control.touched);
   }
 
+  protected formatSiteTypeOption(value: string): string {
+    return this.formatEnum(value);
+  }
+
   private loadCompany(companyId: number): void {
     this.isLoading.set(true);
     this.errorMessage.set(null);
     this.company.set(null);
     this.sites.set([]);
+    this.siteEditorMode.set('list');
+    this.editingSiteId.set(null);
     this.sitesError.set(null);
+    this.sitesLoadedCompanyId.set(null);
     this.siteSubmitError.set(null);
     this.siteSubmitSuccess.set(null);
 
@@ -355,15 +440,87 @@ export class CompanyOverviewComponent {
         next: (sites) => {
           this.sites.set(this.sortSites(sites));
           this.sitesLoading.set(false);
+          this.sitesLoadedCompanyId.set(companyId);
         },
         error: (error: HttpErrorResponse) => {
           this.sitesLoading.set(false);
           this.sites.set([]);
+          this.sitesLoadedCompanyId.set(null);
           this.sitesError.set(
             error.error?.message ?? error.message ?? 'The sites endpoint could not be reached.',
           );
         },
       });
+  }
+
+  private loadSiteTypes(): void {
+    this.siteTypesLoading.set(true);
+    this.siteTypesError.set(null);
+
+    this.siteService
+      .getSiteTypeOptions()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (siteTypes) => {
+          this.siteTypeOptions.set(siteTypes);
+          this.siteTypesLoading.set(false);
+        },
+        error: (error: HttpErrorResponse) => {
+          this.siteTypesLoading.set(false);
+          this.siteTypesError.set(
+            error.error?.message ?? error.message ?? 'The site types could not be loaded.',
+          );
+        },
+      });
+  }
+
+  private loadSiteStatuses(): void {
+    this.siteStatusesLoading.set(true);
+    this.siteStatusesError.set(null);
+
+    this.siteService
+      .getSiteStatusOptions()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (siteStatuses) => {
+          this.siteStatusOptions.set(siteStatuses);
+          this.siteStatusesLoading.set(false);
+        },
+        error: (error: HttpErrorResponse) => {
+          this.siteStatusesLoading.set(false);
+          this.siteStatusesError.set(
+            error.error?.message ?? error.message ?? 'The site statuses could not be loaded.',
+          );
+        },
+      });
+  }
+
+  private ensureSitesLoaded(): void {
+    if (this.sitesLoading()) {
+      return;
+    }
+
+    if (this.sitesLoadedCompanyId() === this.companyId()) {
+      return;
+    }
+
+    this.loadSites(this.companyId());
+  }
+
+  private ensureSiteTypesLoaded(): void {
+    if (this.siteTypesLoading() || this.siteTypeOptions().length > 0) {
+      return;
+    }
+
+    this.loadSiteTypes();
+  }
+
+  private ensureSiteStatusesLoaded(): void {
+    if (this.siteStatusesLoading() || this.siteStatusOptions().length > 0) {
+      return;
+    }
+
+    this.loadSiteStatuses();
   }
 
   private fallback(value?: string | null): string {
@@ -378,6 +535,40 @@ export class CompanyOverviewComponent {
     return [...sites].sort((left, right) =>
       (left.siteName ?? '').localeCompare(right.siteName ?? '', 'en', { sensitivity: 'base' }),
     );
+  }
+
+  private upsertSite(sites: SiteModel[], site: SiteModel): SiteModel[] {
+    const existingIndex = sites.findIndex((currentSite) => currentSite.id === site.id);
+
+    if (existingIndex === -1) {
+      return this.sortSites([site, ...sites]);
+    }
+
+    const updatedSites = [...sites];
+    updatedSites[existingIndex] = site;
+    return this.sortSites(updatedSites);
+  }
+
+  private resetSiteForm(): void {
+    this.siteForm.reset({
+      siteName: '',
+      siteCode: '',
+      city: '',
+      country: 'AT',
+      address: '',
+      postalCode: '',
+      siteType: '',
+      status: 'ACTIVE',
+      productionProcess: '',
+      totalAreaM2: null,
+      estimatedAnnualConsumptionTJ: null,
+    });
+  }
+
+  private closeSiteForm(): void {
+    this.siteEditorMode.set('list');
+    this.editingSiteId.set(null);
+    this.resetSiteForm();
   }
 
   private formatNumber(value?: number | null): string {
