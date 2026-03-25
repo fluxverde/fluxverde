@@ -231,14 +231,14 @@
                   </div>
                 </div>
               } @else if (company()) {
-                <article class="fv-card">
+                <article class="fv-card" data-testid="company-card">
                   <div class="fv-card__grid">
                     @for (field of companyFields(); track field.label) {
-                      <div class="fv-card__item">
-                        <p class="fv-card__label">
+                      <div class="fv-card__item" data-testid="company-card-field">
+                        <p class="fv-card__label" data-testid="company-card-field-label">
                           {{ field.label }}
                         </p>
-                        <p class="fv-card__value">
+                        <p class="fv-card__value" data-testid="company-card-field-value">
                           {{ field.value }}
                         </p>
                       </div>
