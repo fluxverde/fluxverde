@@ -7,12 +7,18 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DrawerModule } from 'primeng/drawer';
 import { combineLatest } from 'rxjs';
 import { CompanyModel, CreateSiteRequest, SiteModel } from '../../models/company.model';
+import { ManualMeterEntryModel, MeterReadingModel } from '../../models/meter-data.model';
+import { CreateMeterRequest, MeterModel, MeterTypeModel } from '../../models/meter.model';
 import { CSVUploadModel } from '../../models/csv-upload.model';
 import { CompanyService } from '../../services/company.service';
 import { CsvUploadService } from '../../services/csv-upload.service';
+import { MeterService } from '../../services/meter.service';
 import { SiteService } from '../../services/site.service';
 import { ThemeService } from '../../services/theme.service';
 import { AuditProcessComponent } from '../audit-process/audit-process.component';
+import { CompanyMeterDataComponent } from './company-meter-data.component';
+import { CompanyMeterFormComponent } from './company-meter-form.component';
+import { CompanyMetersListComponent } from './company-meters-list.component';
 import { CompanySiteFormComponent } from './company-site-form.component';
 import { CompanySitesListComponent } from './company-sites-list.component';
 import { CsvUploadTaskListComponent } from '../evidence/csv-upload-task-list.component';
@@ -44,6 +50,9 @@ interface OverviewSubsection {
     AuditProcessComponent,
     CompanySitesListComponent,
     CompanySiteFormComponent,
+    CompanyMetersListComponent,
+    CompanyMeterFormComponent,
+    CompanyMeterDataComponent,
   ],
   templateUrl: './company-overview.component.html',
   styleUrl: './company-overview.component.scss',
@@ -55,6 +64,7 @@ export class CompanyOverviewComponent {
   private readonly formBuilder = inject(FormBuilder);
   private readonly companyService = inject(CompanyService);
   private readonly csvUploadService = inject(CsvUploadService);
+  private readonly meterService = inject(MeterService);
   private readonly siteService = inject(SiteService);
   private readonly themeService = inject(ThemeService);
 
@@ -72,7 +82,10 @@ export class CompanyOverviewComponent {
   protected readonly overviewSubsection = signal<'summary' | 'sites'>('summary');
   protected readonly sites = signal<SiteModel[]>([]);
   protected readonly siteEditorMode = signal<'list' | 'create' | 'edit'>('list');
+  protected readonly metersViewMode = signal<'list' | 'form'>('list');
+  protected readonly selectedMeterForData = signal<MeterModel | null>(null);
   protected readonly editingSiteId = signal<number | null>(null);
+  protected readonly selectedSiteForMeters = signal<SiteModel | null>(null);
   protected readonly siteSubmitError = signal<string | null>(null);
   protected readonly siteSubmitSuccess = signal<string | null>(null);
   protected readonly siteSubmitting = signal(false);
@@ -85,6 +98,23 @@ export class CompanyOverviewComponent {
   protected readonly siteStatusOptions = signal<string[]>([]);
   protected readonly siteStatusesLoading = signal(false);
   protected readonly siteStatusesError = signal<string | null>(null);
+  protected readonly meters = signal<MeterModel[]>([]);
+  protected readonly editingMeterId = signal<number | null>(null);
+  protected readonly meterSubmitError = signal<string | null>(null);
+  protected readonly meterSubmitSuccess = signal<string | null>(null);
+  protected readonly meterSubmitting = signal(false);
+  protected readonly metersLoading = signal(false);
+  protected readonly metersError = signal<string | null>(null);
+  protected readonly meterTypes = signal<MeterTypeModel[]>([]);
+  protected readonly meterTypesLoading = signal(false);
+  protected readonly meterTypesError = signal<string | null>(null);
+  protected readonly meterCategoryOptions = signal<string[]>([]);
+  protected readonly collectionMethodOptions = signal<string[]>([]);
+  protected readonly readingFrequencyOptions = signal<string[]>([]);
+  protected readonly automaticReadings = signal<MeterReadingModel[]>([]);
+  protected readonly automaticReadingsError = signal<string | null>(null);
+  protected readonly manualEntries = signal<ManualMeterEntryModel[]>([]);
+  protected readonly manualEntriesError = signal<string | null>(null);
   protected readonly isDarkMode = computed(() => this.themeService.isDarkMode());
   protected readonly navigationItems: NavigationItem[] = [
     { label: 'Overview', section: 'overview' },
@@ -111,6 +141,21 @@ export class CompanyOverviewComponent {
   protected readonly isSiteListMode = computed(() => this.siteEditorMode() === 'list');
   protected readonly isSiteCreateMode = computed(() => this.siteEditorMode() === 'create');
   protected readonly isSiteEditMode = computed(() => this.siteEditorMode() === 'edit');
+  protected readonly isMetersContext = computed(() => this.selectedSiteForMeters() !== null);
+  protected readonly isMeterDataContext = computed(() => this.selectedMeterForData() !== null);
+  protected readonly isMeterFormMode = computed(() => this.metersViewMode() === 'form');
+  protected readonly meterFormTitle = computed(() =>
+    this.editingMeterId() ? 'Edit meter' : 'Add meter',
+  );
+  protected readonly meterFormEyebrow = computed(() =>
+    this.editingMeterId() ? 'Edit meter' : 'Add meter',
+  );
+  protected readonly meterSubmitLabel = computed(() => {
+    if (this.meterSubmitting()) {
+      return this.editingMeterId() ? 'Saving changes...' : 'Creating meter...';
+    }
+    return this.editingMeterId() ? 'Save changes' : 'Create meter';
+  });
   protected readonly siteFormTitle = computed(() =>
     this.isSiteEditMode() ? 'Edit company site' : 'Register a company site',
   );
@@ -170,6 +215,22 @@ export class CompanyOverviewComponent {
     productionProcess: [''],
     totalAreaM2: [null as number | null],
     estimatedAnnualConsumptionTJ: [null as number | null],
+  });
+
+  protected readonly meterForm = this.formBuilder.group({
+    meterName: ['', [Validators.required]],
+    meterCode: ['', [Validators.required]],
+    meterSerialNumber: [''],
+    manufacturer: [''],
+    installationDate: [''],
+    nominalPower: [null as number | null],
+    accuracy: [''],
+    location: [''],
+    meterCategory: [''],
+    collectionMethod: [''],
+    readingFrequency: [''],
+    isActive: [true],
+    meterTypeId: [null as number | null],
   });
 
   constructor() {
@@ -321,6 +382,7 @@ export class CompanyOverviewComponent {
   }
 
   protected openCreateSiteForm(): void {
+    this.selectedSiteForMeters.set(null);
     this.siteEditorMode.set('create');
     this.editingSiteId.set(null);
     this.siteSubmitError.set(null);
@@ -329,6 +391,7 @@ export class CompanyOverviewComponent {
   }
 
   protected openEditSiteForm(site: SiteModel): void {
+    this.selectedSiteForMeters.set(null);
     this.siteEditorMode.set('edit');
     this.editingSiteId.set(site.id ?? null);
     this.siteSubmitError.set(null);
@@ -353,6 +416,144 @@ export class CompanyOverviewComponent {
     this.closeSiteForm();
   }
 
+  protected openMetersForSite(site: SiteModel): void {
+    this.selectedSiteForMeters.set(site);
+    this.selectedMeterForData.set(null);
+    this.siteEditorMode.set('list');
+    this.metersViewMode.set('list');
+    this.meterSubmitError.set(null);
+    this.meterSubmitSuccess.set(null);
+    this.editingMeterId.set(null);
+    this.resetMeterForm();
+    this.ensureMeterMetadataLoaded();
+    this.loadMetersForSite(site.id);
+  }
+
+  protected backToSites(): void {
+    this.selectedSiteForMeters.set(null);
+    this.selectedMeterForData.set(null);
+    this.meters.set([]);
+    this.metersError.set(null);
+    this.meterSubmitError.set(null);
+    this.meterSubmitSuccess.set(null);
+    this.editingMeterId.set(null);
+    this.metersViewMode.set('list');
+  }
+
+  protected openCreateMeterForm(): void {
+    this.selectedMeterForData.set(null);
+    this.editingMeterId.set(null);
+    this.meterSubmitError.set(null);
+    this.meterSubmitSuccess.set(null);
+    this.metersViewMode.set('form');
+    this.resetMeterForm();
+  }
+
+  protected openEditMeterForm(meter: MeterModel): void {
+    this.selectedMeterForData.set(null);
+    this.editingMeterId.set(meter.id ?? null);
+    this.meterSubmitError.set(null);
+    this.meterSubmitSuccess.set(null);
+    this.metersViewMode.set('form');
+    this.meterForm.reset({
+      meterName: meter.meterName ?? '',
+      meterCode: meter.meterCode ?? '',
+      meterSerialNumber: meter.meterSerialNumber ?? '',
+      manufacturer: meter.manufacturer ?? '',
+      installationDate: meter.installationDate ?? '',
+      nominalPower: meter.nominalPower ?? null,
+      accuracy: meter.accuracy ?? '',
+      location: meter.location ?? '',
+      meterCategory: meter.meterCategory ?? '',
+      collectionMethod: meter.collectionMethod ?? '',
+      readingFrequency: meter.readingFrequency ?? '',
+      isActive: meter.isActive ?? true,
+      meterTypeId: meter.meterType?.id ?? null,
+    });
+  }
+
+  protected cancelMeterForm(): void {
+    this.meterSubmitError.set(null);
+    this.metersViewMode.set('list');
+    this.editingMeterId.set(null);
+    this.resetMeterForm();
+  }
+
+  protected openMeterData(meter: MeterModel): void {
+    this.selectedMeterForData.set(meter);
+    this.metersViewMode.set('list');
+    this.loadMeterData(meter.id);
+  }
+
+  protected backToMetersList(): void {
+    this.selectedMeterForData.set(null);
+    this.automaticReadings.set([]);
+    this.automaticReadingsError.set(null);
+    this.manualEntries.set([]);
+    this.manualEntriesError.set(null);
+  }
+
+  protected submitMeter(): void {
+    if (this.meterForm.invalid || !this.selectedSiteForMeters()?.id) {
+      this.meterForm.markAllAsTouched();
+      return;
+    }
+
+    const formValue = this.meterForm.getRawValue();
+    const siteId = this.selectedSiteForMeters()!.id!;
+    const meterTypeId = formValue.meterTypeId;
+    const payload: CreateMeterRequest = {
+      meterName: (formValue.meterName ?? '').trim(),
+      meterCode: (formValue.meterCode ?? '').trim(),
+      meterSerialNumber: this.optionalValue(formValue.meterSerialNumber),
+      manufacturer: this.optionalValue(formValue.manufacturer),
+      installationDate: this.optionalValue(formValue.installationDate),
+      nominalPower: formValue.nominalPower,
+      accuracy: this.optionalValue(formValue.accuracy),
+      location: this.optionalValue(formValue.location),
+      meterCategory: this.optionalValue(formValue.meterCategory),
+      collectionMethod: this.optionalValue(formValue.collectionMethod),
+      readingFrequency: this.optionalValue(formValue.readingFrequency),
+      isActive: formValue.isActive ?? true,
+      site: { id: siteId },
+      meterType: meterTypeId ? { id: meterTypeId } : undefined,
+    };
+
+    this.meterSubmitting.set(true);
+    this.meterSubmitError.set(null);
+    this.meterSubmitSuccess.set(null);
+
+    const editingMeterId = this.editingMeterId();
+    const request =
+      editingMeterId !== null
+        ? this.meterService.updateMeter(editingMeterId, payload)
+        : this.meterService.createMeter(payload);
+
+    request.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (savedMeter) => {
+        const enrichedMeter = this.decorateMeter(savedMeter, siteId);
+        this.meters.update((meters) => this.upsertMeter(meters, enrichedMeter));
+        this.meterSubmitting.set(false);
+        this.meterSubmitSuccess.set(
+          editingMeterId !== null
+            ? `Meter ${enrichedMeter.meterName ?? payload.meterName} updated.`
+            : `Meter ${enrichedMeter.meterName ?? payload.meterName} created.`,
+        );
+        this.cancelMeterForm();
+      },
+      error: (error: HttpErrorResponse) => {
+        this.meterSubmitting.set(false);
+        this.meterSubmitError.set(
+          error.error?.message ??
+            error.message ??
+            (editingMeterId !== null
+              ? 'The meter could not be updated.'
+              : 'The meter could not be created.'),
+        );
+      },
+    });
+  }
+
   protected formatSiteLocation(site: SiteModel): string {
     return [site.city, site.country].filter(Boolean).join(', ') || '—';
   }
@@ -375,12 +576,23 @@ export class CompanyOverviewComponent {
     this.errorMessage.set(null);
     this.company.set(null);
     this.sites.set([]);
+    this.meters.set([]);
+    this.automaticReadings.set([]);
+    this.manualEntries.set([]);
     this.siteEditorMode.set('list');
+    this.metersViewMode.set('list');
     this.editingSiteId.set(null);
+    this.editingMeterId.set(null);
+    this.selectedSiteForMeters.set(null);
+    this.selectedMeterForData.set(null);
     this.sitesError.set(null);
     this.sitesLoadedCompanyId.set(null);
     this.siteSubmitError.set(null);
     this.siteSubmitSuccess.set(null);
+    this.meterSubmitError.set(null);
+    this.meterSubmitSuccess.set(null);
+    this.automaticReadingsError.set(null);
+    this.manualEntriesError.set(null);
 
     this.companyService
       .getCompanyById(companyId)
@@ -499,6 +711,124 @@ export class CompanyOverviewComponent {
       });
   }
 
+  private loadMetersForSite(siteId?: number): void {
+    if (!siteId) {
+      this.meters.set([]);
+      return;
+    }
+
+    this.metersLoading.set(true);
+    this.metersError.set(null);
+
+    this.meterService
+      .listMeters()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (meters) => {
+          this.meters.set(
+            meters
+              .filter((meter) => meter.site?.id === siteId)
+              .sort((left, right) =>
+                (left.meterName ?? '').localeCompare(right.meterName ?? '', 'en', {
+                  sensitivity: 'base',
+                }),
+              ),
+          );
+          this.metersLoading.set(false);
+        },
+        error: (error: HttpErrorResponse) => {
+          this.metersLoading.set(false);
+          this.meters.set([]);
+          this.metersError.set(
+            error.error?.message ?? error.message ?? 'The meters endpoint could not be reached.',
+          );
+        },
+      });
+  }
+
+  private loadMeterMetadata(): void {
+    this.meterTypesLoading.set(true);
+    this.meterTypesError.set(null);
+
+    this.meterService
+      .listMeterTypes()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (meterTypes) => {
+          this.meterTypes.set(meterTypes);
+          this.meterTypesLoading.set(false);
+        },
+        error: (error: HttpErrorResponse) => {
+          this.meterTypesLoading.set(false);
+          this.meterTypesError.set(
+            error.error?.message ?? error.message ?? 'The meter types could not be loaded.',
+          );
+        },
+      });
+
+    this.meterService
+      .getMeterCategoryOptions()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((options) => this.meterCategoryOptions.set(options));
+
+    this.meterService
+      .getCollectionMethodOptions()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((options) => this.collectionMethodOptions.set(options));
+
+    this.meterService
+      .getReadingFrequencyOptions()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((options) => this.readingFrequencyOptions.set(options));
+  }
+
+  private loadMeterData(meterId?: number): void {
+    if (!meterId) {
+      this.automaticReadings.set([]);
+      this.manualEntries.set([]);
+      return;
+    }
+
+    this.automaticReadingsError.set(null);
+    this.manualEntriesError.set(null);
+
+    this.meterService
+      .listMeterReadings()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (readings) => {
+          this.automaticReadings.set(
+            readings.filter((reading) => reading.meter?.id === meterId),
+          );
+        },
+        error: (error: HttpErrorResponse) => {
+          this.automaticReadings.set([]);
+          this.automaticReadingsError.set(
+            error.error?.message ??
+              error.message ??
+              'Automatic readings are currently unavailable from the backend.',
+          );
+        },
+      });
+
+    this.meterService
+      .listManualMeterEntries()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (entries) => {
+          this.manualEntries.set(entries.filter((entry) => entry.meter?.id === meterId));
+        },
+        error: (error: HttpErrorResponse) => {
+          this.manualEntries.set([]);
+          this.manualEntriesError.set(
+            error.error?.message ??
+              error.message ??
+              'Manual entries are currently unavailable from the backend.',
+          );
+        },
+      });
+  }
+
   private ensureSitesLoaded(): void {
     if (this.sitesLoading()) {
       return;
@@ -525,6 +855,18 @@ export class CompanyOverviewComponent {
     }
 
     this.loadSiteStatuses();
+  }
+
+  private ensureMeterMetadataLoaded(): void {
+    if (
+      this.meterTypesLoading() ||
+      this.meterTypes().length > 0 ||
+      this.meterCategoryOptions().length > 0
+    ) {
+      return;
+    }
+
+    this.loadMeterMetadata();
   }
 
   private fallback(value?: string | null): string {
@@ -573,6 +915,53 @@ export class CompanyOverviewComponent {
     this.siteEditorMode.set('list');
     this.editingSiteId.set(null);
     this.resetSiteForm();
+  }
+
+  private resetMeterForm(): void {
+    this.meterForm.reset({
+      meterName: '',
+      meterCode: '',
+      meterSerialNumber: '',
+      manufacturer: '',
+      installationDate: '',
+      nominalPower: null,
+      accuracy: '',
+      location: '',
+      meterCategory: '',
+      collectionMethod: '',
+      readingFrequency: '',
+      isActive: true,
+      meterTypeId: null,
+    });
+  }
+
+  private upsertMeter(meters: MeterModel[], meter: MeterModel): MeterModel[] {
+    const index = meters.findIndex((currentMeter) => currentMeter.id === meter.id);
+
+    if (index === -1) {
+      return [...meters, meter].sort((left, right) =>
+        (left.meterName ?? '').localeCompare(right.meterName ?? '', 'en', {
+          sensitivity: 'base',
+        }),
+      );
+    }
+
+    const updated = [...meters];
+    updated[index] = meter;
+    return updated;
+  }
+
+  private decorateMeter(meter: MeterModel, siteId: number): MeterModel {
+    const meterType =
+      meter.meterType?.id !== undefined
+        ? this.meterTypes().find((type) => type.id === meter.meterType?.id) ?? meter.meterType
+        : meter.meterType;
+
+    return {
+      ...meter,
+      site: meter.site ?? { id: siteId },
+      meterType,
+    };
   }
 
   private formatNumber(value?: number | null): string {

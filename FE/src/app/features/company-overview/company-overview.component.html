@@ -253,7 +253,46 @@
             }
 
             @if (isOverviewSites()) {
-              @if (isSiteListMode()) {
+              @if (isMetersContext()) {
+                @if (isMeterDataContext()) {
+                  <app-company-meter-data
+                    [meter]="selectedMeterForData()"
+                    [readings]="automaticReadings()"
+                    [readingsError]="automaticReadingsError()"
+                    [manualEntries]="manualEntries()"
+                    [manualEntriesError]="manualEntriesError()"
+                    (back)="backToMetersList()"
+                  />
+                } @else if (isMeterFormMode()) {
+                  <app-company-meter-form
+                    [form]="meterForm"
+                    [site]="selectedSiteForMeters()"
+                    [formEyebrow]="meterFormEyebrow()"
+                    [formTitle]="meterFormTitle()"
+                    [submitLabel]="meterSubmitLabel()"
+                    [isSubmitting]="meterSubmitting()"
+                    [submitError]="meterSubmitError()"
+                    [meterTypes]="meterTypes()"
+                    [meterCategoryOptions]="meterCategoryOptions()"
+                    [collectionMethodOptions]="collectionMethodOptions()"
+                    [readingFrequencyOptions]="readingFrequencyOptions()"
+                    (cancel)="cancelMeterForm()"
+                    (submit)="submitMeter()"
+                  />
+                } @else {
+                  <app-company-meters-list
+                    [site]="selectedSiteForMeters()"
+                    [meters]="meters()"
+                    [loading]="metersLoading()"
+                    [errorMessage]="metersError()"
+                    [successMessage]="meterSubmitSuccess()"
+                    (back)="backToSites()"
+                    (addMeter)="openCreateMeterForm()"
+                    (editMeter)="openEditMeterForm($event)"
+                    (viewData)="openMeterData($event)"
+                  />
+                }
+              } @else if (isSiteListMode()) {
                 <app-company-sites-list
                   [sites]="sites()"
                   [loading]="sitesLoading()"
@@ -261,6 +300,7 @@
                   [successMessage]="siteSubmitSuccess()"
                   (addSite)="openCreateSiteForm()"
                   (editSite)="openEditSiteForm($event)"
+                  (viewMeters)="openMetersForSite($event)"
                 />
               } @else {
                 <app-company-site-form

@@ -85,7 +85,15 @@ import { SiteModel } from '../../models/company.model';
               <span data-testid="site-table-status">{{ site.status || '—' }}</span>
               <span data-testid="site-table-area">{{ site.totalAreaM2 ? site.totalAreaM2 + ' m²' : '—' }}</span>
               <span data-testid="site-table-energy">{{ site.estimatedAnnualConsumptionTJ ? site.estimatedAnnualConsumptionTJ + ' TJ' : '—' }}</span>
-              <div>
+              <div class="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  (click)="viewMeters.emit(site)"
+                  class="inline-flex items-center gap-2 rounded-xl border border-emerald-900/10 bg-white/85 px-3 py-2 text-sm font-semibold text-emerald-900 transition hover:bg-emerald-50 dark:border-emerald-100/10 dark:bg-slate-900/70 dark:text-emerald-50 dark:hover:bg-slate-900"
+                >
+                  <span aria-hidden="true">≡</span>
+                  <span>Meters</span>
+                </button>
                 <button
                   type="button"
                   (click)="editSite.emit(site)"
@@ -115,6 +123,7 @@ export class CompanySitesListComponent {
   readonly successMessage = input<string | null>(null);
   readonly addSite = output<void>();
   readonly editSite = output<SiteModel>();
+  readonly viewMeters = output<SiteModel>();
 
   protected formatSiteLocation(site: SiteModel): string {
     return [site.city, site.country].filter(Boolean).join(', ') || '—';
