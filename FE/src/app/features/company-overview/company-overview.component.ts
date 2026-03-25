@@ -3,12 +3,14 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DrawerModule } from 'primeng/drawer';
 import { combineLatest } from 'rxjs';
-import { CompanyModel } from '../../models/company.model';
+import { CompanyModel, CreateSiteRequest, SiteModel } from '../../models/company.model';
 import { CSVUploadModel } from '../../models/csv-upload.model';
 import { CompanyService } from '../../services/company.service';
 import { CsvUploadService } from '../../services/csv-upload.service';
+import { SiteService } from '../../services/site.service';
 import { ThemeService } from '../../services/theme.service';
 import { AuditProcessComponent } from '../audit-process/audit-process.component';
 import { CsvUploadTaskListComponent } from '../evidence/csv-upload-task-list.component';
@@ -23,10 +25,22 @@ interface NavigationItem {
   section: string;
 }
 
+interface OverviewSubsection {
+  label: string;
+  key: 'summary' | 'sites';
+}
+
 @Component({
   selector: 'app-company-overview',
   standalone: true,
-  imports: [CommonModule, RouterLink, DrawerModule, CsvUploadTaskListComponent, AuditProcessComponent],
+  imports: [
+    CommonModule,
+    RouterLink,
+    DrawerModule,
+    ReactiveFormsModule,
+    CsvUploadTaskListComponent,
+    AuditProcessComponent,
+  ],
   templateUrl: './company-overview.component.html',
   styleUrl: './company-overview.component.scss',
 })
@@ -34,8 +48,10 @@ export class CompanyOverviewComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly formBuilder = inject(FormBuilder);
   private readonly companyService = inject(CompanyService);
   private readonly csvUploadService = inject(CsvUploadService);
+  private readonly siteService = inject(SiteService);
   private readonly themeService = inject(ThemeService);
 
   protected readonly company = signal<CompanyModel | null>(null);
@@ -49,6 +65,13 @@ export class CompanyOverviewComponent {
   protected readonly csvUploads = signal<CSVUploadModel[]>([]);
   protected readonly csvUploadsLoading = signal(false);
   protected readonly csvUploadsError = signal<string | null>(null);
+  protected readonly overviewSubsection = signal<'summary' | 'sites'>('summary');
+  protected readonly sites = signal<SiteModel[]>([]);
+  protected readonly siteSubmitError = signal<string | null>(null);
+  protected readonly siteSubmitSuccess = signal<string | null>(null);
+  protected readonly siteSubmitting = signal(false);
+  protected readonly sitesLoading = signal(false);
+  protected readonly sitesError = signal<string | null>(null);
   protected readonly isDarkMode = computed(() => this.themeService.isDarkMode());
   protected readonly navigationItems: NavigationItem[] = [
     { label: 'Overview', section: 'overview' },
@@ -63,14 +86,21 @@ export class CompanyOverviewComponent {
     { label: 'Exports', section: 'exports' },
     { label: 'Audit Log', section: 'audit-log' },
   ];
+  protected readonly overviewSubsections: OverviewSubsection[] = [
+    { label: 'Summary', key: 'summary' },
+    { label: 'Sites', key: 'sites' },
+  ];
   protected readonly isOverviewSection = computed(() => this.currentSection() === 'overview');
   protected readonly isAuditProcessSection = computed(() => this.currentSection() === 'audit-process');
   protected readonly isEvidenceSection = computed(() => this.currentSection() === 'evidence');
+  protected readonly isOverviewSummary = computed(() => this.overviewSubsection() === 'summary');
+  protected readonly isOverviewSites = computed(() => this.overviewSubsection() === 'sites');
   protected readonly currentSectionLabel = computed(
     () =>
       this.navigationItems.find((item) => item.section === this.currentSection())?.label ??
       'Overview',
   );
+  protected readonly hasSites = computed(() => this.sites().length > 0);
 
   protected readonly companyFields = computed<CompanyField[]>(() => {
     const company = this.company();
@@ -99,6 +129,19 @@ export class CompanyOverviewComponent {
     ];
   });
 
+  protected readonly siteForm = this.formBuilder.nonNullable.group({
+    siteName: ['', [Validators.required]],
+    siteCode: ['', [Validators.required]],
+    city: [''],
+    country: ['AT', [Validators.required, Validators.minLength(2), Validators.maxLength(2)]],
+    address: [''],
+    postalCode: [''],
+    siteType: [''],
+    productionProcess: [''],
+    totalAreaM2: [null as number | null],
+    estimatedAnnualConsumptionTJ: [null as number | null],
+  });
+
   constructor() {
     combineLatest([this.route.paramMap, this.route.queryParamMap])
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -107,12 +150,17 @@ export class CompanyOverviewComponent {
         const currentSection = params.get('section') ?? 'overview';
         const companyId = Number.parseInt(queryParams.get('companyId') ?? '1', 10);
         const sanitizedCompanyId = Number.isFinite(companyId) && companyId > 0 ? companyId : 1;
+        const requestedOverviewSubsection = queryParams.get('overviewTab');
+        const overviewSubsection =
+          requestedOverviewSubsection === 'sites' ? 'sites' : 'summary';
 
         this.caseId.set(caseId);
         this.currentSection.set(currentSection);
+        this.overviewSubsection.set(overviewSubsection);
         this.companyId.set(sanitizedCompanyId);
         this.companyIdInput.set(String(sanitizedCompanyId));
         this.loadCompany(sanitizedCompanyId);
+        this.loadSites(sanitizedCompanyId);
 
         if (currentSection === 'evidence' || currentSection === 'audit-process') {
           this.loadCsvUploads();
@@ -126,6 +174,16 @@ export class CompanyOverviewComponent {
 
   protected updateCompanyIdInput(value: string): void {
     this.companyIdInput.set(value);
+  }
+
+  protected setOverviewSubsection(subsection: 'summary' | 'sites'): void {
+    this.overviewSubsection.set(subsection);
+
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { overviewTab: subsection },
+      queryParamsHandling: 'merge',
+    });
   }
 
   protected applyCompanyId(): void {
@@ -143,7 +201,7 @@ export class CompanyOverviewComponent {
     });
   }
 
-  protected readonly siteCount = computed(() => this.company()?.sites?.length ?? 0);
+  protected readonly siteCount = computed(() => this.sites().length);
   protected readonly userCount = computed(() => this.company()?.users?.length ?? 0);
   protected readonly benchmarkCount = computed(() => this.company()?.benchmarks?.length ?? 0);
 
@@ -155,10 +213,85 @@ export class CompanyOverviewComponent {
     this.drawerOpen.set(value);
   }
 
+  protected submitSite(): void {
+    if (this.siteForm.invalid) {
+      this.siteForm.markAllAsTouched();
+      return;
+    }
+
+    const formValue = this.siteForm.getRawValue();
+    const payload: CreateSiteRequest = {
+      siteName: formValue.siteName.trim(),
+      siteCode: formValue.siteCode.trim(),
+      city: this.optionalValue(formValue.city),
+      country: formValue.country.trim().toUpperCase(),
+      address: this.optionalValue(formValue.address),
+      postalCode: this.optionalValue(formValue.postalCode),
+      siteType: this.optionalValue(formValue.siteType),
+      productionProcess: this.optionalValue(formValue.productionProcess),
+      totalAreaM2: formValue.totalAreaM2,
+      estimatedAnnualConsumptionTJ: formValue.estimatedAnnualConsumptionTJ,
+      companyId: this.companyId(),
+    };
+
+    this.siteSubmitting.set(true);
+    this.siteSubmitError.set(null);
+    this.siteSubmitSuccess.set(null);
+
+    this.siteService
+      .createSite(payload)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (createdSite) => {
+          const site = { ...createdSite, companyId: createdSite.companyId ?? this.companyId() };
+          this.sites.update((sites) => [site, ...sites]);
+          this.siteSubmitting.set(false);
+          this.siteSubmitSuccess.set(`Site ${site.siteName ?? payload.siteName} created.`);
+          this.siteForm.reset({
+            siteName: '',
+            siteCode: '',
+            city: '',
+            country: payload.country,
+            address: '',
+            postalCode: '',
+            siteType: '',
+            productionProcess: '',
+            totalAreaM2: null,
+            estimatedAnnualConsumptionTJ: null,
+          });
+        },
+        error: (error: HttpErrorResponse) => {
+          this.siteSubmitting.set(false);
+          this.siteSubmitError.set(
+            error.error?.message ??
+              error.message ??
+              'The site could not be created. Verify that the backend is reachable and the payload matches the API.',
+          );
+        },
+      });
+  }
+
+  protected formatSiteLocation(site: SiteModel): string {
+    return [site.city, site.country].filter(Boolean).join(', ') || '—';
+  }
+
+  protected trackSite(_: number, site: SiteModel): string | number {
+    return site.id ?? site.siteCode ?? site.siteName ?? _;
+  }
+
+  protected hasSiteFieldError(controlName: keyof typeof this.siteForm.controls): boolean {
+    const control = this.siteForm.controls[controlName];
+    return control.invalid && (control.dirty || control.touched);
+  }
+
   private loadCompany(companyId: number): void {
     this.isLoading.set(true);
     this.errorMessage.set(null);
     this.company.set(null);
+    this.sites.set([]);
+    this.sitesError.set(null);
+    this.siteSubmitError.set(null);
+    this.siteSubmitSuccess.set(null);
 
     this.companyService
       .getCompanyById(companyId)
@@ -166,6 +299,7 @@ export class CompanyOverviewComponent {
       .subscribe({
         next: (company) => {
           this.company.set(company);
+          this.sites.set(this.sortSites(company.sites ?? []));
           this.isLoading.set(false);
         },
         error: (error: HttpErrorResponse) => {
@@ -210,8 +344,40 @@ export class CompanyOverviewComponent {
       });
   }
 
+  private loadSites(companyId: number): void {
+    this.sitesLoading.set(true);
+    this.sitesError.set(null);
+
+    this.siteService
+      .listSites(companyId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (sites) => {
+          this.sites.set(this.sortSites(sites));
+          this.sitesLoading.set(false);
+        },
+        error: (error: HttpErrorResponse) => {
+          this.sitesLoading.set(false);
+          this.sites.set([]);
+          this.sitesError.set(
+            error.error?.message ?? error.message ?? 'The sites endpoint could not be reached.',
+          );
+        },
+      });
+  }
+
   private fallback(value?: string | null): string {
     return value?.trim() ? value : '—';
+  }
+
+  private optionalValue(value?: string | null): string | undefined {
+    return value?.trim() ? value.trim() : undefined;
+  }
+
+  private sortSites(sites: SiteModel[]): SiteModel[] {
+    return [...sites].sort((left, right) =>
+      (left.siteName ?? '').localeCompare(right.siteName ?? '', 'en', { sensitivity: 'base' }),
+    );
   }
 
   private formatNumber(value?: number | null): string {

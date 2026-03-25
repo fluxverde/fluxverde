@@ -193,35 +193,261 @@
               </button>
             </div>
 
-            @if (isLoading()) {
-              <div class="fv-card">
-                <div class="fv-card__grid">
-                  @for (item of [1, 2, 3, 4, 5, 6, 7, 8, 9]; track item) {
+            <div class="mb-6 flex flex-wrap gap-2">
+              @for (subsection of overviewSubsections; track subsection.key) {
+                <button
+                  type="button"
+                  (click)="setOverviewSubsection(subsection.key)"
+                  class="rounded-full border px-4 py-2 text-sm font-semibold transition"
+                  [class.border-emerald-800]="subsection.key === overviewSubsection()"
+                  [class.bg-emerald-800]="subsection.key === overviewSubsection()"
+                  [class.text-white]="subsection.key === overviewSubsection()"
+                  [class.shadow-[0_14px_32px_-18px_rgba(6,95,70,.9)]]="subsection.key === overviewSubsection()"
+                  [class.border-emerald-900/10]="subsection.key !== overviewSubsection()"
+                  [class.bg-white/80]="subsection.key !== overviewSubsection()"
+                  [class.text-emerald-950]="subsection.key !== overviewSubsection()"
+                  [class.hover:bg-emerald-50]="subsection.key !== overviewSubsection()"
+                  [class.dark:border-emerald-100/10]="subsection.key !== overviewSubsection()"
+                  [class.dark:bg-slate-900/55]="subsection.key !== overviewSubsection()"
+                  [class.dark:text-emerald-50]="subsection.key !== overviewSubsection()"
+                  [class.dark:hover:bg-slate-900]="subsection.key !== overviewSubsection()"
+                  [attr.aria-pressed]="subsection.key === overviewSubsection()"
+                >
+                  {{ subsection.label }}
+                </button>
+              }
+            </div>
+
+            @if (isOverviewSummary()) {
+              @if (isLoading()) {
+                <div class="fv-card">
+                  <div class="fv-card__grid">
+                    @for (item of [1, 2, 3, 4, 5, 6, 7, 8, 9]; track item) {
+                      <div>
+                        <div class="h-2.5 w-20 rounded-full bg-emerald-100 dark:bg-emerald-100/10"></div>
+                        <div class="mt-2 h-4 w-32 rounded-full bg-emerald-200 dark:bg-emerald-100/15"></div>
+                      </div>
+                    }
+                  </div>
+                </div>
+              } @else if (company()) {
+                <article class="fv-card">
+                  <div class="fv-card__grid">
+                    @for (field of companyFields(); track field.label) {
+                      <div class="fv-card__item">
+                        <p class="fv-card__label">
+                          {{ field.label }}
+                        </p>
+                        <p class="fv-card__value">
+                          {{ field.value }}
+                        </p>
+                      </div>
+                    }
+                  </div>
+                </article>
+              } @else {
+                <div class="rounded-[1.75rem] border border-amber-300/60 bg-amber-50 px-5 py-5 text-sm leading-6 text-amber-950 dark:border-amber-300/20 dark:bg-amber-500/10 dark:text-amber-100">
+                  {{ errorMessage() }}
+                </div>
+              }
+            }
+
+            @if (isOverviewSites()) {
+              <div class="grid gap-6 xl:grid-cols-[minmax(0,23rem)_minmax(0,1fr)]">
+                <section class="rounded-[1.75rem] border border-emerald-900/10 bg-emerald-50/70 p-5 dark:border-emerald-100/10 dark:bg-slate-900/45">
+                  <div class="flex items-start justify-between gap-3">
                     <div>
-                      <div class="h-2.5 w-20 rounded-full bg-emerald-100 dark:bg-emerald-100/10"></div>
-                      <div class="mt-2 h-4 w-32 rounded-full bg-emerald-200 dark:bg-emerald-100/15"></div>
-                    </div>
-                  }
-                </div>
-              </div>
-            } @else if (company()) {
-              <article class="fv-card">
-                <div class="fv-card__grid">
-                  @for (field of companyFields(); track field.label) {
-                    <div class="fv-card__item">
-                      <p class="fv-card__label">
-                        {{ field.label }}
+                      <p class="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-800/70 dark:text-emerald-100/70">
+                        Add site
                       </p>
-                      <p class="fv-card__value">
-                        {{ field.value }}
+                      <h2 class="mt-2 text-2xl font-extrabold tracking-tight text-emerald-950 dark:text-emerald-50">
+                        Register a company site
+                      </h2>
+                    </div>
+                    <div class="rounded-2xl border border-emerald-900/10 bg-white/80 px-3 py-2 text-right dark:border-emerald-100/10 dark:bg-slate-950/70">
+                      <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-800/70 dark:text-emerald-100/70">
+                        Company
+                      </p>
+                      <p class="mt-1 text-lg font-extrabold text-emerald-950 dark:text-emerald-50">
+                        {{ companyId() }}
                       </p>
                     </div>
+                  </div>
+
+                  <form class="mt-6 space-y-4" [formGroup]="siteForm" (ngSubmit)="submitSite()">
+                    <label class="block">
+                      <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-emerald-800/70 dark:text-emerald-100/70">
+                        Site name
+                      </span>
+                      <input type="text" formControlName="siteName" class="fv-input" />
+                      @if (hasSiteFieldError('siteName')) {
+                        <p class="fv-input-error">Site name is required.</p>
+                      }
+                    </label>
+
+                    <label class="block">
+                      <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-emerald-800/70 dark:text-emerald-100/70">
+                        Site code
+                      </span>
+                      <input type="text" formControlName="siteCode" class="fv-input" />
+                      @if (hasSiteFieldError('siteCode')) {
+                        <p class="fv-input-error">Site code is required.</p>
+                      }
+                    </label>
+
+                    <div class="grid gap-4 sm:grid-cols-2">
+                      <label class="block">
+                        <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-emerald-800/70 dark:text-emerald-100/70">
+                          City
+                        </span>
+                        <input type="text" formControlName="city" class="fv-input" />
+                      </label>
+
+                      <label class="block">
+                        <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-emerald-800/70 dark:text-emerald-100/70">
+                          Country
+                        </span>
+                        <input type="text" maxlength="2" formControlName="country" class="fv-input uppercase" />
+                        @if (hasSiteFieldError('country')) {
+                          <p class="fv-input-error">Use a two-letter country code.</p>
+                        }
+                      </label>
+                    </div>
+
+                    <label class="block">
+                      <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-emerald-800/70 dark:text-emerald-100/70">
+                        Address
+                      </span>
+                      <input type="text" formControlName="address" class="fv-input" />
+                    </label>
+
+                    <div class="grid gap-4 sm:grid-cols-2">
+                      <label class="block">
+                        <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-emerald-800/70 dark:text-emerald-100/70">
+                          Postal code
+                        </span>
+                        <input type="text" formControlName="postalCode" class="fv-input" />
+                      </label>
+
+                      <label class="block">
+                        <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-emerald-800/70 dark:text-emerald-100/70">
+                          Site type
+                        </span>
+                        <input type="text" formControlName="siteType" class="fv-input" />
+                      </label>
+                    </div>
+
+                    <label class="block">
+                      <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-emerald-800/70 dark:text-emerald-100/70">
+                        Production process
+                      </span>
+                      <textarea rows="3" formControlName="productionProcess" class="fv-input fv-input--textarea"></textarea>
+                    </label>
+
+                    <div class="grid gap-4 sm:grid-cols-2">
+                      <label class="block">
+                        <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-emerald-800/70 dark:text-emerald-100/70">
+                          Total area (m²)
+                        </span>
+                        <input type="number" min="0" formControlName="totalAreaM2" class="fv-input" />
+                      </label>
+
+                      <label class="block">
+                        <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-emerald-800/70 dark:text-emerald-100/70">
+                          Annual consumption (TJ)
+                        </span>
+                        <input type="number" min="0" step="0.01" formControlName="estimatedAnnualConsumptionTJ" class="fv-input" />
+                      </label>
+                    </div>
+
+                    @if (siteSubmitError()) {
+                      <div class="rounded-2xl border border-rose-300/70 bg-rose-50 px-4 py-3 text-sm leading-6 text-rose-950 dark:border-rose-300/20 dark:bg-rose-500/10 dark:text-rose-100">
+                        {{ siteSubmitError() }}
+                      </div>
+                    }
+
+                    @if (siteSubmitSuccess()) {
+                      <div class="rounded-2xl border border-emerald-300/70 bg-emerald-50 px-4 py-3 text-sm leading-6 text-emerald-950 dark:border-emerald-300/20 dark:bg-emerald-500/10 dark:text-emerald-100">
+                        {{ siteSubmitSuccess() }}
+                      </div>
+                    }
+
+                    <button
+                      type="submit"
+                      [disabled]="siteSubmitting()"
+                      class="w-full rounded-2xl bg-emerald-800 px-5 py-3 text-sm font-semibold text-white shadow-[0_14px_32px_-18px_rgba(6,95,70,.9)] transition hover:-translate-y-0.5 hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-emerald-500 dark:text-slate-950 dark:hover:bg-emerald-400"
+                    >
+                      {{ siteSubmitting() ? 'Creating site...' : 'Create site' }}
+                    </button>
+                  </form>
+                </section>
+
+                <section class="rounded-[1.75rem] border border-white/70 bg-white/65 p-5 shadow-[0_18px_60px_-38px_rgba(15,118,110,.4)] dark:border-emerald-100/10 dark:bg-slate-950/35">
+                  <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                    <div>
+                      <p class="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-800/70 dark:text-emerald-100/70">
+                        Company sites
+                      </p>
+                      <h2 class="mt-2 text-2xl font-extrabold tracking-tight text-emerald-950 dark:text-emerald-50">
+                        Sites linked to this company
+                      </h2>
+                      <p class="mt-2 text-sm leading-6 text-emerald-950/70 dark:text-emerald-100/70">
+                        Records are loaded from the dedicated sites endpoint for the selected company. New records are appended here after a successful site create request.
+                      </p>
+                    </div>
+                    <div class="rounded-2xl border border-emerald-900/10 bg-emerald-50/80 px-4 py-3 text-right dark:border-emerald-100/10 dark:bg-emerald-900/20">
+                      <p class="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-800/70 dark:text-emerald-100/70">Site count</p>
+                      <p class="mt-1 text-2xl font-extrabold text-emerald-950 dark:text-emerald-50">
+                        {{ sites().length }}
+                      </p>
+                    </div>
+                  </div>
+
+                  @if (sitesLoading()) {
+                    <div class="mt-6 grid gap-3">
+                      @for (item of [1, 2, 3]; track item) {
+                        <div class="h-24 rounded-[1.5rem] border border-emerald-900/10 bg-emerald-50/60 dark:border-emerald-100/10 dark:bg-slate-900/45"></div>
+                      }
+                    </div>
+                  } @else if (sitesError()) {
+                    <div class="mt-6 rounded-[1.75rem] border border-rose-300/60 bg-rose-50 px-5 py-5 text-sm leading-6 text-rose-950 dark:border-rose-300/20 dark:bg-rose-500/10 dark:text-rose-100">
+                      {{ sitesError() }}
+                    </div>
+                  } @else if (hasSites()) {
+                    <div class="mt-6 overflow-hidden rounded-[1.5rem] border border-emerald-900/10 dark:border-emerald-100/10">
+                      <div class="site-table site-table--header">
+                        <span>Site</span>
+                        <span>Location</span>
+                        <span>Type</span>
+                        <span>Status</span>
+                        <span>Area</span>
+                        <span>Energy</span>
+                      </div>
+
+                      @for (site of sites(); track trackSite($index, site)) {
+                        <div class="site-table">
+                          <div>
+                            <p class="font-semibold text-emerald-950 dark:text-emerald-50">
+                              {{ site.siteName || 'Unnamed site' }}
+                            </p>
+                            <p class="mt-1 text-xs uppercase tracking-[0.14em] text-emerald-800/65 dark:text-emerald-100/55">
+                              {{ site.siteCode || 'No code' }}
+                            </p>
+                          </div>
+                          <span>{{ formatSiteLocation(site) }}</span>
+                          <span>{{ site.siteType || '—' }}</span>
+                          <span>{{ site.status || '—' }}</span>
+                          <span>{{ site.totalAreaM2 ? site.totalAreaM2 + ' m²' : '—' }}</span>
+                          <span>{{ site.estimatedAnnualConsumptionTJ ? site.estimatedAnnualConsumptionTJ + ' TJ' : '—' }}</span>
+                        </div>
+                      }
+                    </div>
+                  } @else {
+                    <div class="mt-6 rounded-[1.75rem] border border-dashed border-emerald-900/15 bg-emerald-50/60 px-5 py-8 text-sm leading-6 text-emerald-950/75 dark:border-emerald-100/15 dark:bg-slate-900/40 dark:text-emerald-100/75">
+                      No sites are attached to this company yet. Use the form to create the first one.
+                    </div>
                   }
-                </div>
-              </article>
-            } @else {
-              <div class="rounded-[1.75rem] border border-amber-300/60 bg-amber-50 px-5 py-5 text-sm leading-6 text-amber-950 dark:border-amber-300/20 dark:bg-amber-500/10 dark:text-amber-100">
-                {{ errorMessage() }}
+                </section>
               </div>
             }
           </section>

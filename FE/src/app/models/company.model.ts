@@ -7,9 +7,30 @@ export interface SiteModel {
   postalCode?: string;
   country?: string;
   siteType?: string;
+  productionProcess?: string;
   totalAreaM2?: number;
   estimatedAnnualConsumptionTJ?: number;
+  estimatedAnnualConsumptionkWh?: number;
+  lastAuditDate?: string;
+  nextAuditDate?: string;
+  auditStatus?: string;
   status?: string;
+  companyId?: number;
+}
+
+export interface CreateSiteRequest {
+  siteName: string;
+  siteCode: string;
+  address?: string;
+  city?: string;
+  postalCode?: string;
+  country: string;
+  siteType?: string;
+  productionProcess?: string;
+  totalAreaM2?: number | null;
+  estimatedAnnualConsumptionTJ?: number | null;
+  estimatedAnnualConsumptionkWh?: number | null;
+  companyId: number;
 }
 
 export interface CompanyUserModel {
