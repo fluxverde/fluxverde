@@ -1,0 +1,480 @@
+@startuml
+title FluxVerde Database Entity Relationship Diagram
+
+hide methods
+hide stereotypes
+skinparam backgroundColor white
+skinparam linetype ortho
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+
+entity "CompanyEntity" as Company {
+  * id : Long
+  --
+  companyName : String
+  registrationNumber : String
+  country : String(2)
+  legalRepresentative : String
+  contactEmail : String
+  contactPhone : String
+  industry : String
+  employeeCount : Integer
+  annualRevenueMeur : BigDecimal
+  totalEnergyTjPerYear : BigDecimal
+  regulatoryObligation : ERegulatoryObligation
+  nextMandatoryAuditDate : LocalDate
+  lastAuditDate : LocalDate
+  auditMethodology : EAuditMethodology
+  status : ECompanyStatus
+  createdAt : Instant
+  updatedAt : Instant
+}
+
+entity "SiteEntity" as Site {
+  * id : Long
+  --
+  siteName : String
+  siteCode : String
+  address : String
+  city : String
+  postalCode : String
+  country : String(2)
+  latitude : BigDecimal
+  longitude : BigDecimal
+  siteType : ESiteType
+  productionProcess : String
+  totalAreaM2 : Integer
+  estimatedAnnualConsumptionTJ : BigDecimal
+  estimatedAnnualConsumptionkWh : BigDecimal
+  lastAuditDate : LocalDate
+  nextAuditDate : LocalDate
+  auditStatus : ESiteAuditStatus
+  status : ESiteStatus
+  company_id : FK
+}
+
+entity "CompanyUserEntity" as CompanyUser {
+  * id : Long
+  --
+  userEmail : String
+  firstName : String
+  lastName : String
+  userRole : EUserRoles
+  phoneNumber : String
+  isActive : Boolean
+  lastLoginAt : Instant
+  createdAt : Instant
+  updatedAt : Instant
+  company_id : FK
+}
+
+entity "MeterTypeEntity" as MeterType {
+  * id : Long
+  --
+  typeName : String
+  unit : EMeterTypeUnit
+  category : EMeterTypeCategory
+  conversionFactorToTJ : BigDecimal
+  description : String
+}
+
+entity "MeterEntity" as Meter {
+  * id : Long
+  --
+  meterName : String
+  meterCode : String
+  meterSerialNumber : String
+  manufacturer : String
+  installationDate : LocalDate
+  nominalPower : Integer
+  accuracy : String
+  location : String
+  meterCategory : EMeterCategory
+  collectionMethod : EMeterCollectionMethod
+  readingFrequency : EMeterReadingFrequency
+  isActive : Boolean
+  createdAt : Instant
+  updatedAt : Instant
+  site_id : FK
+  meter_type_id : FK
+}
+
+entity "CSVUploadEntity" as CSVUpload {
+  * id : Long
+  --
+  fileName : String
+  fileSize : Long
+  uploadedBy : String
+  uploadTimestamp : Instant
+  totalRecordsImported : Long
+  successfulRecords : Long
+  failedRecords : Long
+  skippedRecords : Long
+  importStatus : EUploadStatus
+  errorLog : String
+  isProcessed : Boolean
+  processedAt : Instant
+  notes : String
+  site_id : FK
+  meter_type_id : FK
+  company_id : FK
+}
+
+entity "MeterReadingEntity" as MeterReading {
+  * id : Long
+  --
+  readingTimestamp : Instant
+  readingValue : BigDecimal
+  readingStatus : EMeterReadingState
+  confidence : Integer
+  source : EMeterReadingSource
+  enteredByUser : String
+  enteredAt : Instant
+  isOutlier : Boolean
+  anomalyReason : String
+  notes : String
+  batchId : Long
+  normalizedValue : BigDecimal
+  meter_id : FK
+  source_upload_id : FK
+}
+
+entity "ManualMeterEntryEntity" as ManualMeterEntry {
+  * id : Long
+  --
+  entryDate : LocalDate
+  meterReadingValue : BigDecimal
+  unit : String
+  enteredBy : String
+  entryTimestamp : Instant
+  verificationStatus : EVerificationState
+  verifiedBy : String
+  verificationTimestamp : Instant
+  notes : String
+  correctionNotes : String
+  sourceDocument : String
+  meter_id : FK
+  entered_by_user_id : FK
+  verified_by_user_id : FK
+}
+
+entity "EnergyBenchmarkEntity" as EnergyBenchmark {
+  * id : Long
+  --
+  benchmarkCode : String
+  country : String
+  industry : String
+  siteType : String
+  typicalEnergyUsekWhM2 : BigDecimal
+  medianEnergyUsekWhM2 : BigDecimal
+  bestInClasskWhM2 : BigDecimal
+  sourceDataYear : Integer
+  numberOfFacilitiesInSample : Integer
+  description : String
+  sourceReference : String
+  createdAt : Instant
+  updatedAt : Instant
+  company_id : FK
+}
+
+entity "EnergyAuditEntity" as EnergyAudit {
+  * id : Long
+  --
+  auditCode : String
+  auditStartDate : LocalDate
+  auditEndDate : LocalDate
+  auditType : EAuditType
+  leadAuditor : String
+  supportingAuditors : String
+  referenceStartDate : LocalDate
+  referenceEndDate : LocalDate
+  auditStatus : EAuditState
+  regulatoryRequirement : ERegulatoryRequirement
+  complianceFramework : String
+  totalEnergyConsumptionTJ : BigDecimal
+  totalEnergyConsumptionkWh : BigDecimal
+  estimatedAnnualSavingsTJ : BigDecimal
+  estimatedCostSavingsEUR : BigDecimal
+  estimatedROIPercent : BigDecimal
+  reportGenerated : Boolean
+  reportGeneratedDate : Instant
+  reportPath : String
+  createdAt : Instant
+  updatedAt : Instant
+  site_id : FK
+}
+
+entity "AuditChecklistEntity" as AuditChecklist {
+  * id : Long
+  --
+  checklistItemCode : String
+  checklistItemTitle : String
+  category : EAuditChecklistCategory
+  isMandatory : Boolean
+  regulatoryReference : String
+  description : String
+  guidance : String
+  expectedDocumentation : String
+  isCompleted : Boolean
+  completedBy : String
+  completedDate : LocalDate
+  comments : String
+  createdAt : Instant
+  updatedAt : Instant
+  audit_id : FK
+}
+
+entity "AuditFindingEntity" as AuditFinding {
+  * id : Long
+  --
+  findingCode : String
+  findingTitle : String
+  category : EAuditFindingCategory
+  description : String
+  currentStatus : String
+  recommendedAction : String
+  technicalParameters : String
+  estimatedAnnualEnergySavingsTJ : BigDecimal
+  estimatedAnnualEnergySavingskWh : BigDecimal
+  estimatedAnnualCostSavingsEUR : BigDecimal
+  estimatedImplementationCostEUR : BigDecimal
+  paybackPeriodYears : Double
+  estimatedROIPercent : Double
+  priority : EAuditFindingPriority
+  feasibility : EAuditFindingFeasibility
+  implementationTimeline : EImplementationTimeline
+  fundingAvailable : EFundingAvailable
+  fundingSource : String
+  status : EAuditFindingStatus
+  evidencePhotoPath : String
+  referenceMaterial : String
+  affectedMeterCount : Integer
+  createdAt : Instant
+  updatedAt : Instant
+  audit_id : FK
+  primary_meter_id : FK
+  site_id : FK
+}
+
+entity "AuditEvidenceEntity" as AuditEvidence {
+  * id : Long
+  --
+  evidenceCode : String
+  evidenceTitle : String
+  fileName : String
+  fileType : EFileType
+  filePath : String
+  fileSize : Long
+  category : EAuditEvidenceCategory
+  uploadedBy : String
+  uploadedAt : Instant
+  description : String
+  createdAt : Instant
+  updatedAt : Instant
+  audit_id : FK
+  finding_id : FK
+}
+
+entity "UserAuditAccessEntity" as UserAuditAccess {
+  * id : Long
+  --
+  accessLevel : EAccessLevel
+  grantedAt : Instant
+  grantedBy : String
+  expiresAt : Instant
+  user_id : FK
+  audit_id : FK
+}
+
+entity "ReportGenerationEntity" as ReportGeneration {
+  * id : Long
+  --
+  reportCode : String
+  reportType : EReportType
+  reportFormat : EReportFormat
+  generatedAt : Instant
+  generatedBy : String
+  reportTitle : String
+  reportFileName : String
+  reportFilePath : String
+  reportFileSize : Long
+  regulatoryTemplateUsed : String
+  country : String(2)
+  includeFindings : Boolean
+  includeRecommendations : Boolean
+  includeCostAnalysis : Boolean
+  includeCharts : Boolean
+  confidentialityLevel : EConfidentialityLevel
+  reportStatus : EReportState
+  submittedAt : Instant
+  submittedTo : String
+  version : Integer
+  previousVersionPath : String
+  notes : String
+  createdAt : Instant
+  updatedAt : Instant
+  audit_id : FK
+}
+
+entity "ExportLogEntity" as ExportLog {
+  * id : Long
+  --
+  exportCode : String
+  exportType : EExportType
+  exportFormat : String
+  exportedAt : Instant
+  exportedBy : String
+  exportedEntity : EExportLogEntity
+  recordsExported : Long
+  exportFileName : String
+  exportFilePath : String
+  recipientEmail : String
+  purpose : EExportPurpose
+  createdAt : Instant
+  updatedAt : Instant
+  audit_id : FK
+}
+
+entity "RegulatoryTemplateEntity" as RegulatoryTemplate {
+  * id : Long
+  --
+  templateCode : String
+  templateName : String
+  country : String(2)
+  regulatoryFramework : ERegulatoryTemplateType
+  validFromDate : LocalDate
+  validUntilDate : LocalDate
+  reportFormat : EReportFormatStandard
+  requiredSections : String
+  calculationMethodology : String
+  mandatorySEUThreshold : BigDecimal
+  mandatoryCO2Reporting : Boolean
+  mandatoryCostAnalysis : Boolean
+  submissionDeadlineMonths : Integer
+  submissionFormat : ESubmissionFormatType
+  submissionAuthority : String
+  submissionURL : String
+  recordRetentionYears : Integer
+  reportLanguage : String
+  version : String
+  description : String
+  status : ERegulatoryTemplateStatus
+  createdAt : Instant
+  updatedAt : Instant
+}
+
+entity "CountryRequirementEntity" as CountryRequirement {
+  * id : Long
+  --
+  requirementCode : String
+  requirementTitle : String
+  country : String(2)
+  regulatorySource : ERegulatorySource
+  sourceReference : String
+  description : String
+  applicableSiteType : String
+  energyThresholdTJ : BigDecimal
+  implementationGuidance : String
+  deadline : LocalDate
+  referenceDocumentURL : String
+  contactAuthority : String
+  createdAt : Instant
+  updatedAt : Instant
+  template_id : FK
+}
+
+entity "CalculationRuleEntity" as CalculationRule {
+  * id : Long
+  --
+  ruleCode : String
+  ruleName : String
+  country : String
+  applicableToSiteType : ECalculationSiteType
+  applicableToIndustry : String
+  formulaDescription : String
+  normalizationFactor : ECalculationNormalizationFactor
+  benchmarkValue : BigDecimal
+  climateAdjustmentFactors : String
+  productionVolumeFactor : BigDecimal
+  calculationFormula : String
+  createdAt : Instant
+  updatedAt : Instant
+  template_id : FK
+}
+
+entity "ConsumptionTrendEntity" as ConsumptionTrend {
+  * id : Long
+  --
+  trendDate : LocalDate
+  aggregationPeriod : EAggregationPeriod
+  energyConsumptionkWh : BigDecimal
+  energyConsumptionTJ : BigDecimal
+  specificEnergyUsekWhM2 : BigDecimal
+  costPerUnit : BigDecimal
+  comparedToPreviousPeriod : BigDecimal
+  trend : EConsumptionTrendDirection
+  ambientTemperatureC : BigDecimal
+  isClimateAdjusted : Boolean
+  createdAt : Instant
+  updatedAt : Instant
+  site_id : FK
+  meter_id : FK
+}
+
+entity "audit_finding_entity_affected_meters" as AuditFindingAffectedMeters {
+  * audit_finding_entity_id : FK
+  * affected_meters_id : FK
+}
+
+Company ||--o{ Site : owns
+Company ||--o{ CompanyUser : has
+Company ||--o{ EnergyBenchmark : has
+Company ||--o{ CSVUpload : receives
+
+Site ||--o{ Meter : contains
+Site ||--o{ CSVUpload : scopes
+Site ||--o{ EnergyAudit : audited_in
+Site ||--o{ AuditFinding : impacts
+Site ||--o{ ConsumptionTrend : trends
+
+MeterType ||--o{ Meter : classifies
+MeterType ||--o{ CSVUpload : import_type
+
+Meter ||--o{ MeterReading : records
+Meter ||--o{ ManualMeterEntry : manual_entries
+Meter ||--o{ ConsumptionTrend : trends
+Meter ||--o{ AuditFinding : primary_for
+
+CSVUpload ||--o{ MeterReading : source_batch
+
+CompanyUser ||--o{ ManualMeterEntry : entered_entries
+CompanyUser ||--o{ ManualMeterEntry : verified_entries
+CompanyUser ||--o{ UserAuditAccess : granted_access
+
+EnergyAudit ||--o{ AuditChecklist : checklist_items
+EnergyAudit ||--o{ AuditFinding : findings
+EnergyAudit ||--o{ AuditEvidence : evidence
+EnergyAudit ||--o{ UserAuditAccess : access_control
+EnergyAudit ||--o{ ReportGeneration : reports
+EnergyAudit ||--o{ ExportLog : exports
+
+AuditFinding ||--o{ AuditEvidence : supported_by
+
+RegulatoryTemplate ||--o{ CountryRequirement : defines
+RegulatoryTemplate ||--o{ CalculationRule : contains
+
+AuditFinding ||--o{ AuditFindingAffectedMeters : join
+Meter ||--o{ AuditFindingAffectedMeters : join
+
+note right of AuditFindingAffectedMeters
+  Join table created by @ManyToMany
+  between AuditFindingEntity.affectedMeters
+  and MeterEntity
+end note
+
+note bottom of ReportGeneration
+  regulatoryTemplateUsed is stored as text,
+  not as a foreign key to RegulatoryTemplateEntity
+end note
+
+@enduml

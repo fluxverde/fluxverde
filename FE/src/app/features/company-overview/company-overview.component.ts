@@ -10,6 +10,7 @@ import { CSVUploadModel } from '../../models/csv-upload.model';
 import { CompanyService } from '../../services/company.service';
 import { CsvUploadService } from '../../services/csv-upload.service';
 import { ThemeService } from '../../services/theme.service';
+import { AuditProcessComponent } from '../audit-process/audit-process.component';
 import { CsvUploadTaskListComponent } from '../evidence/csv-upload-task-list.component';
 
 interface CompanyField {
@@ -25,7 +26,7 @@ interface NavigationItem {
 @Component({
   selector: 'app-company-overview',
   standalone: true,
-  imports: [CommonModule, RouterLink, DrawerModule, CsvUploadTaskListComponent],
+  imports: [CommonModule, RouterLink, DrawerModule, CsvUploadTaskListComponent, AuditProcessComponent],
   templateUrl: './company-overview.component.html',
   styleUrl: './company-overview.component.scss',
 })
@@ -51,6 +52,7 @@ export class CompanyOverviewComponent {
   protected readonly isDarkMode = computed(() => this.themeService.isDarkMode());
   protected readonly navigationItems: NavigationItem[] = [
     { label: 'Overview', section: 'overview' },
+    { label: 'Audit Journey', section: 'audit-process' },
     { label: 'Documents', section: 'documents' },
     { label: 'Evidence Ledger', section: 'evidence' },
     { label: 'Review Queue', section: 'review-queue' },
@@ -62,6 +64,7 @@ export class CompanyOverviewComponent {
     { label: 'Audit Log', section: 'audit-log' },
   ];
   protected readonly isOverviewSection = computed(() => this.currentSection() === 'overview');
+  protected readonly isAuditProcessSection = computed(() => this.currentSection() === 'audit-process');
   protected readonly isEvidenceSection = computed(() => this.currentSection() === 'evidence');
   protected readonly currentSectionLabel = computed(
     () =>
@@ -111,7 +114,7 @@ export class CompanyOverviewComponent {
         this.companyIdInput.set(String(sanitizedCompanyId));
         this.loadCompany(sanitizedCompanyId);
 
-        if (currentSection === 'evidence') {
+        if (currentSection === 'evidence' || currentSection === 'audit-process') {
           this.loadCsvUploads();
         }
       });
