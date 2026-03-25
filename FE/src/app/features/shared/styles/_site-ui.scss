@@ -1,0 +1,106 @@
+.fv-input {
+  width: 100%;
+  border-radius: 1rem;
+  border: 1px solid rgba(6, 95, 70, 0.15);
+  background: rgba(255, 255, 255, 0.9);
+  padding: 0.85rem 1rem;
+  color: rgb(6, 78, 59);
+  outline: none;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.fv-input:focus {
+  border-color: rgb(16, 185, 129);
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.12);
+}
+
+.fv-input--textarea {
+  min-height: 5.5rem;
+  resize: vertical;
+}
+
+.fv-input-error {
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgb(190, 24, 93);
+}
+
+.fv-input-hint {
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(6, 78, 59, 0.72);
+}
+
+.site-table {
+  display: grid;
+  grid-template-columns: minmax(12rem, 1.6fr) repeat(5, minmax(0, 1fr)) minmax(7.5rem, 0.9fr);
+  min-width: 72rem;
+  gap: 1rem;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  border-top: 1px solid rgba(6, 95, 70, 0.08);
+  font-size: 0.95rem;
+  color: rgba(6, 78, 59, 0.86);
+  background: rgba(255, 255, 255, 0.76);
+}
+
+.site-table--header {
+  border-top: 0;
+  background: rgba(209, 250, 229, 0.72);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(6, 78, 59, 0.72);
+}
+
+:host-context(.dark) .fv-input {
+  border-color: rgba(255, 255, 255, 0.08);
+  background: rgba(2, 6, 23, 0.78);
+  color: rgb(236, 253, 245);
+}
+
+:host-context(.dark) .fv-input:focus {
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.18);
+}
+
+:host-context(.dark) .fv-input-error {
+  color: rgb(253, 164, 175);
+}
+
+:host-context(.dark) .fv-input-hint {
+  color: rgba(236, 253, 245, 0.68);
+}
+
+:host-context(.dark) .site-table {
+  border-top-color: rgba(255, 255, 255, 0.08);
+  background: rgba(2, 6, 23, 0.46);
+  color: rgba(236, 253, 245, 0.82);
+}
+
+:host-context(.dark) .site-table--header {
+  background: rgba(6, 78, 59, 0.36);
+  color: rgba(236, 253, 245, 0.62);
+}
+
+@media (max-width: 1023px) {
+  .site-table {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    min-width: 0;
+  }
+
+  .site-table--header {
+    display: none;
+  }
+}
+
+@media (max-width: 639px) {
+  .site-table {
+    grid-template-columns: 1fr;
+  }
+}

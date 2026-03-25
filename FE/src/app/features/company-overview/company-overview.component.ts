@@ -13,6 +13,8 @@ import { CsvUploadService } from '../../services/csv-upload.service';
 import { SiteService } from '../../services/site.service';
 import { ThemeService } from '../../services/theme.service';
 import { AuditProcessComponent } from '../audit-process/audit-process.component';
+import { CompanySiteFormComponent } from './company-site-form.component';
+import { CompanySitesListComponent } from './company-sites-list.component';
 import { CsvUploadTaskListComponent } from '../evidence/csv-upload-task-list.component';
 
 interface CompanyField {
@@ -40,6 +42,8 @@ interface OverviewSubsection {
     ReactiveFormsModule,
     CsvUploadTaskListComponent,
     AuditProcessComponent,
+    CompanySitesListComponent,
+    CompanySiteFormComponent,
   ],
   templateUrl: './company-overview.component.html',
   styleUrl: './company-overview.component.scss',
